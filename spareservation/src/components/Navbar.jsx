@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box, Avatar } from '@mui/material';
 import { Logout, Spa } from '@mui/icons-material';
 
 const Navbar = ({ userName, onLogout, role }) => {
@@ -7,38 +7,33 @@ const Navbar = ({ userName, onLogout, role }) => {
     <AppBar 
       position="fixed" 
       sx={{ 
-        zIndex: (theme) => theme.zIndex.drawer + 1, 
-        bgcolor: '#7b1fa2',
-        boxShadow: 3 
+        bgcolor: '#54350D', 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        borderBottom: '1px solid #936025'
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Spa sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-            SPA & NAILS SYSTEM
+          <Spa sx={{ color: '#BE7333', fontSize: 28 }} />
+          <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1, color: '#FBF6CF' }}>
+            Nexo 
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-            <Typography variant="body1" sx={{ lineHeight: 1, fontWeight: 'medium' }}>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#FBF6CF', lineHeight: 1 }}>
               {userName}
             </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.8, textTransform: 'uppercase' }}>
+            <Typography variant="caption" sx={{ color: '#BE7333', textTransform: 'uppercase', fontWeight: 700 }}>
               {role === 'admin' ? 'Administrador' : 'Recepcionista'}
             </Typography>
           </Box>
-          
           <IconButton 
-            color="inherit" 
             onClick={onLogout}
-            sx={{ 
-              bgcolor: 'rgba(255,255,255,0.1)', 
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } 
-            }}
+            sx={{ color: '#FBF6CF', bgcolor: 'rgba(189, 115, 51, 0.2)', '&:hover': { bgcolor: '#BE7333' } }}
           >
-            <Logout />
+            <Logout fontSize="small" />
           </IconButton>
         </Box>
       </Toolbar>

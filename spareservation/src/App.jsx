@@ -4,8 +4,8 @@ import AppRoutes from './routes/AppRoutes';
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#7b1fa2' }, // Un morado elegante para el Spa
-    secondary: { main: '#f48fb1' }, // Rosa para Nails
+    primary: { main: '#7b1fa2' }, 
+    secondary: { main: '#f48fb1' }, 
   },
 });
 

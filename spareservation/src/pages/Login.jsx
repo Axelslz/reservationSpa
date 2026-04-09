@@ -75,7 +75,7 @@ const Login = () => {
               <LockOutlined />
             </Box>
             <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
-              Spa & Nails
+              Nexo
             </Typography>
             <Typography variant="body2" color="textSecondary">
               Control de Seguridad Interno
