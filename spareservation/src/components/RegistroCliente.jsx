@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, Button, 
-  TextField, Box, Typography, CircularProgress, Paper, Grid 
+  TextField, Box, Typography, CircularProgress, Paper, Grid,
+  InputAdornment, Fade, Zoom, IconButton
 } from '@mui/material';
-import { PersonAdd, Fingerprint, CheckCircleOutline } from '@mui/icons-material';
+import { 
+  PersonAdd, Fingerprint, CheckCircleOutline, Close, 
+  Badge, LocalPhone, MailOutline, ContentCopy 
+} from '@mui/icons-material';
 
 const RegistroCliente = ({ open, onClose }) => {
   const [step, setStep] = useState(1);
@@ -17,6 +21,7 @@ const RegistroCliente = ({ open, onClose }) => {
 
   const manejarRegistro = () => {
     setLoading(true);
+    
     setTimeout(() => {
       const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
       const numPart = Math.floor(100 + Math.random() * 900);
@@ -24,7 +29,7 @@ const RegistroCliente = ({ open, onClose }) => {
       setCodigoGenerado(nuevoCodigo);
       setLoading(false);
       setStep(2);
-    }, 1500);
+    }, 2000);
   };
 
   const reiniciarYSalir = () => {
@@ -35,75 +40,186 @@ const RegistroCliente = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={step === 1 ? onClose : null} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 4, bgcolor: '#FBF6CF' } }}>
+    <Dialog 
+      open={open} 
+      onClose={step === 1 ? onClose : null} 
+      maxWidth="xs" 
+      fullWidth 
+      TransitionComponent={Fade}
+      PaperProps={{ 
+        sx: { 
+          borderRadius: 5, 
+          bgcolor: '#FFF', 
+          overflow: 'hidden',
+          boxShadow: '0 20px 60px rgba(84, 53, 13, 0.2)'
+        } 
+      }}
+    >
       <DialogTitle sx={{ 
-        bgcolor: step === 1 ? '#FBF6CF' : '#e8f5e9', 
-        color: '#54350D',
-        fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 
+        bgcolor: step === 1 ? '#54350D' : '#553813', 
+        color: '#FBF6CF',
+        p: 3,
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        {step === 1 ? <PersonAdd sx={{ color: '#936025' }} /> : <CheckCircleOutline color="success" />}
-        {step === 1 ? 'Nuevo Registro de Cliente' : '¡Registro Exitoso!'}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {step === 1 ? <PersonAdd /> : <CheckCircleOutline />}
+          <Typography variant="h6" fontWeight="800">
+            {step === 1 ? 'Membresía Nueva' : '¡Bienvenido a la Familia!'}
+          </Typography>
+        </Box>
+        {step === 1 && (
+          <IconButton onClick={onClose} sx={{ color: '#FBF6CF' }}>
+            <Close fontSize="small" />
+          </IconButton>
+        )}
       </DialogTitle>
       
-      <DialogContent dividers sx={{ borderColor: '#93602533' }}>
+      <DialogContent sx={{ p: 4, mt: 2 }}>
         {step === 1 ? (
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <TextField 
-                fullWidth label="Nombre Completo" name="nombre"
-                value={cliente.nombre} onChange={handleChange}
-                variant="outlined" required 
-                sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fff' } }}
-              />
+          <Box component="form">
+            <Typography variant="body2" sx={{ mb: 3, color: '#936025', fontStyle: 'italic' }}>
+              Completa los datos para generar el código único de acceso del cliente.
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth label="Nombre Completo" name="nombre"
+                  placeholder="Ej. Ana García López"
+                  value={cliente.nombre} onChange={handleChange}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><Badge sx={{ color: '#936025' }} /></InputAdornment>,
+                  }}
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth label="Teléfono" name="telefono"
+                  placeholder="961 000 0000"
+                  value={cliente.telefono} onChange={handleChange}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><LocalPhone sx={{ color: '#936025' }} /></InputAdornment>,
+                  }}
+                  sx={inputStyle}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  fullWidth label="Correo Electrónico" name="email"
+                  placeholder="cliente@ejemplo.com"
+                  value={cliente.email} onChange={handleChange}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><MailOutline sx={{ color: '#936025' }} /></InputAdornment>,
+                  }}
+                  sx={inputStyle}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                fullWidth label="Teléfono" name="telefono"
-                value={cliente.telefono} onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fff' } }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField 
-                fullWidth label="Correo Electrónico" name="email"
-                value={cliente.email} onChange={handleChange}
-                sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#fff' } }}
-              />
-            </Grid>
-          </Grid>
-        ) : (
-          <Box sx={{ py: 3, textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ color: '#54350D', mb: 2 }}>Código Generado</Typography>
-            <Paper elevation={0} sx={{ p: 3, bgcolor: '#fff', border: '2px dashed #936025', borderRadius: 3, mb: 2 }}>
-              <Typography variant="h3" sx={{ fontWeight: 'bold', letterSpacing: 4, color: '#936025', fontFamily: 'monospace' }}>
-                {codigoGenerado}
-              </Typography>
-            </Paper>
           </Box>
+        ) : (
+          <Zoom in={step === 2}>
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              <Typography variant="body1" sx={{ color: '#54350D', mb: 1 }}>
+                Registro completado para <strong>{cliente.nombre}</strong>
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Este código es único e intransferible
+              </Typography>
+              
+              <Paper elevation={0} sx={{ 
+                p: 4, mt: 3, bgcolor: '#FBF6CF44', 
+                border: '2px dashed #936025', 
+                borderRadius: 4,
+                position: 'relative'
+              }}>
+                <Typography variant="h3" sx={{ 
+                  fontWeight: '900', 
+                  letterSpacing: 6, 
+                  color: '#936025', 
+                  fontFamily: 'monospace',
+                  textShadow: '1px 1px 0px #fff'
+                }}>
+                  {codigoGenerado}
+                </Typography>
+                <IconButton 
+                  size="small" 
+                  sx={{ position: 'absolute', top: 8, right: 8, color: '#936025' }}
+                  onClick={() => navigator.clipboard.writeText(codigoGenerado)}
+                >
+                  <ContentCopy fontSize="inherit" />
+                </IconButton>
+              </Paper>
+            </Box>
+          </Zoom>
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 2 }}>
+      <DialogActions sx={{ p: 4, pt: 0 }}>
         {step === 1 ? (
-          <>
-            <Button onClick={onClose} sx={{ color: '#54350D' }}>Cancelar</Button>
-            <Button 
-              onClick={manejarRegistro} variant="contained" 
-              disabled={!cliente.nombre || loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Fingerprint />}
-              sx={{ bgcolor: '#936025', '&:hover': { bgcolor: '#54350D' } }}
-            >
-              Registrar Cliente
-            </Button>
-          </>
+          <Button 
+            fullWidth
+            onClick={manejarRegistro} 
+            variant="contained" 
+            disabled={!cliente.nombre || loading}
+            sx={{ 
+              bgcolor: '#936025', 
+              py: 1.8,
+              borderRadius: 3,
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              boxShadow: '0 8px 20px rgba(147, 96, 37, 0.3)',
+              '&:hover': { bgcolor: '#54350D' },
+              textTransform: 'none'
+            }}
+          >
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CircularProgress size={24} color="inherit" />
+                <Typography>Generando Código...</Typography>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Fingerprint /> Generar Alta de Cliente
+              </Box>
+            )}
+          </Button>
         ) : (
-          <Button fullWidth onClick={reiniciarYSalir} variant="contained" color="success" sx={{ py: 1.5, fontWeight: 'bold' }}>
-            Finalizar y Cerrar
+          <Button 
+            fullWidth 
+            onClick={reiniciarYSalir} 
+            variant="contained" 
+            color="success" 
+            sx={{ 
+              py: 2, 
+              borderRadius: 3, 
+              fontWeight: '900',
+              boxShadow: '0 8px 20px rgba(151, 92, 16, 0.67)'
+            }}
+          >
+            LISTO, VOLVER AL DASHBOARD
           </Button>
         )}
       </DialogActions>
     </Dialog>
   );
+};
+
+const inputStyle = {
+  '& .MuiOutlinedInput-root': { 
+    borderRadius: 3, 
+    bgcolor: '#FBF6CF22',
+    transition: '0.3s',
+    '&:hover': { bgcolor: '#FBF6CF44' },
+    '&.Mui-focused': { bgcolor: '#fff' }
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#936025' },
+  '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#936025',
+    borderWidth: '2px'
+  }
 };
 
 export default RegistroCliente;

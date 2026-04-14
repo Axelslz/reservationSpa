@@ -6,7 +6,7 @@ import {
 import { Close, History, Assignment, Person } from '@mui/icons-material';
 
 const HistorialCliente = ({ open, onClose, cliente }) => {
-  // Datos de ejemplo para el historial
+    
   const historialEjemplo = [
     { fecha: '2023-10-15', servicio: 'Masaje Relajante', precio: '$450', notas: 'Cliente prefiere música suave.' },
     { fecha: '2023-09-12', servicio: 'Facial Hidratante', precio: '$600', notas: 'Piel sensible detectada.' },

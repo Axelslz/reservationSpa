@@ -9,13 +9,12 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const CalendarioCompleto = ({ open, onClose }) => {
-  // Datos de ejemplo: Citas pasadas y futuras
+  
   const eventosEjemplo = [
     { title: 'Facial - Ana García', start: '2026-04-05T10:30:00', color: '#936025' },
     { title: 'Masaje - Karla López', start: '2026-04-09T14:00:00', color: '#54350D' },
