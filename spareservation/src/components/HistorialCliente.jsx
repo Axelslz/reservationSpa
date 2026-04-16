@@ -26,7 +26,6 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
       </DialogTitle>
 
       <DialogContent sx={{ p: 4, bgcolor: '#fff' }}>
-        {/* Encabezado del Cliente */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
           <Avatar sx={{ bgcolor: '#936025', width: 56, height: 56 }}>{cliente.nombre[0]}</Avatar>
           <Box>
@@ -37,7 +36,6 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
 
         <Divider sx={{ mb: 3 }} />
 
-        {/* Lista de Visitas */}
         <List sx={{ width: '100%' }}>
           {historialEjemplo.map((item, index) => (
             <ListItem 

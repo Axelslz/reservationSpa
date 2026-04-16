@@ -256,9 +256,12 @@ const Dashboard = () => {
 
       </Box>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} PaperProps={{ sx: { borderRadius: 3, minWidth: 180 } }}>
         <MenuItem onClick={handleMenuClose}><ListItemIcon><CheckCircle fontSize="small" color="success" /></ListItemIcon> Check-in</MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={{ bgcolor: '#FBF6CF' }}><ListItemIcon><LocalAtm fontSize="small" /></ListItemIcon> Cobrar</MenuItem>
+        <MenuItem onClick={handleMenuClose}><ListItemIcon><PlayCircleOutline fontSize="small" color="primary" /></ListItemIcon> Iniciar</MenuItem>
+        <MenuItem onClick={handleMenuClose}><ListItemIcon><DoneAll fontSize="small" /></ListItemIcon> Finalizar</MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}><ListItemIcon><Block fontSize="small" color="error" /></ListItemIcon> No asistió</MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ bgcolor: '#FBF6CF', fontWeight: 'bold' }}><ListItemIcon><LocalAtm fontSize="small" /></ListItemIcon> Cobrar</MenuItem>
       </Menu>
 
       <RegistroCliente open={openRegistro} onClose={() => setOpenRegistro(false)} />

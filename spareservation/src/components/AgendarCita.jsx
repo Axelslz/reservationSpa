@@ -20,7 +20,6 @@ const AgendarCita = ({ open, onClose, clienteSeleccionado }) => {
     servicioId: '' 
   });
 
-  // Datos simulados (Idealmente vendrían de una API)
   const horasDisponibles = ['09:00 AM', '10:30 AM', '12:00 PM', '02:00 PM', '04:30 PM', '06:00 PM'];
   
   const masajistas = [
@@ -39,7 +38,7 @@ const AgendarCita = ({ open, onClose, clienteSeleccionado }) => {
 
   const renderStepContent = (step) => {
     switch (step) {
-      case 0: // NUEVA INTERFAZ DE FECHA Y HORA
+      case 0: 
         return (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 2, color: '#54350D', fontWeight: 'bold' }}>

@@ -48,7 +48,6 @@ const Navbar = ({ userName, onLogout, role }) => {
             }}
           />
           
-          {/* Parte de las Letras */}
           <Box 
             component="img"
             src={LogoLetras}
