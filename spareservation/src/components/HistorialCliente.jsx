@@ -3,20 +3,27 @@ import {
   Dialog, DialogTitle, DialogContent, Box, Typography, IconButton, 
   Divider, List, ListItem, ListItemText, Chip, Avatar
 } from '@mui/material';
-import { Close, History, Assignment, Person } from '@mui/icons-material';
+import { Close, History } from '@mui/icons-material';
 
 const HistorialCliente = ({ open, onClose, cliente }) => {
-    
+  
   const historialEjemplo = [
     { fecha: '2023-10-15', servicio: 'Masaje Relajante', precio: '$450', notas: 'Cliente prefiere música suave.' },
     { fecha: '2023-09-12', servicio: 'Facial Hidratante', precio: '$600', notas: 'Piel sensible detectada.' },
     { fecha: '2023-08-05', servicio: 'Exfoliación Corporal', precio: '$350', notas: 'Sin observaciones.' },
   ];
 
+  // Si no hay cliente, no renderizamos nada para evitar errores
   if (!cliente) return null;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{ '& .MuiPaper-root': { borderRadius: 4 } }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth 
+      sx={{ '& .MuiPaper-root': { borderRadius: 4 } }}
+    >
       <DialogTitle sx={{ m: 0, p: 3, bgcolor: '#54350D', color: '#FBF6CF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <History />
@@ -27,10 +34,17 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
 
       <DialogContent sx={{ p: 4, bgcolor: '#fff' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-          <Avatar sx={{ bgcolor: '#936025', width: 56, height: 56 }}>{cliente.nombre[0]}</Avatar>
+          {/* Usamos Optional Chaining ?. para evitar el error de "undefined" */}
+          <Avatar sx={{ bgcolor: '#936025', width: 56, height: 56 }}>
+            {cliente?.nombreCompleto ? cliente.nombreCompleto[0] : 'C'}
+          </Avatar>
           <Box>
-            <Typography variant="h5" color="#54350D" fontWeight="900">{cliente.nombre}</Typography>
-            <Typography variant="body2" color="#936025">Código: {cliente.codigo}</Typography>
+            <Typography variant="h5" color="#54350D" fontWeight="900">
+              {cliente?.nombreCompleto || 'Cargando...'}
+            </Typography>
+            <Typography variant="body2" color="#936025">
+              Código: {cliente?.codigoUnico || 'N/A'}
+            </Typography>
           </Box>
         </Box>
 
@@ -46,7 +60,8 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
                 borderRadius: 3, 
                 border: '1px solid #FBF6CF',
                 flexDirection: 'column',
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                p: 2
               }}
             >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mb: 1 }}>

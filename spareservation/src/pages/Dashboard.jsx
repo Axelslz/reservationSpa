@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, CssBaseline, Button, Typography, TextField, InputAdornment, 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
@@ -15,9 +15,18 @@ import RegistroCliente from '../components/RegistroCliente';
 import AgendarCita from '../components/AgendarCita';
 import HistorialCliente from '../components/HistorialCliente';
 import CalendarioCompleto from '../components/CalendarioCompleto';
+import { getTodosLosClientes } from '../services/clientService';
+import { getAgendaHoy } from '../services/appointmentService';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  
+  // ESTADOS PARA DATOS REALES
+  const [clientes, setClientes] = useState([]);
+  const [citasHoy, setCitasHoy] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estados de modales
   const [openRegistro, setOpenRegistro] = useState(false);
   const [openAgenda, setOpenAgenda] = useState(false);
   const [openHistorial, setOpenHistorial] = useState(false);
@@ -37,17 +46,33 @@ const Dashboard = () => {
     setSelectedCita(null);
   };
 
-  const clientesEjemplo = [
-    { id: 1, nombre: 'Ana García', telefono: '961 123 4455', codigo: 'SPA-AXJ210', status: 'Activo' },
-    { id: 2, nombre: 'Karla López', telefono: '961 998 1122', codigo: 'SPA-BKL993', status: 'Nuevo' },
-    { id: 3, nombre: 'Roberto Solis', telefono: '961 445 6677', codigo: 'SPA-RST442', status: 'Activo' },
-  ];
+  // CARGA DE DATOS DESDE EL BACKEND
+  const cargarDatos = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [dataClientes, dataAgenda] = await Promise.all([
+        getTodosLosClientes(),
+        getAgendaHoy()
+      ]);
+      setClientes(dataClientes);
+      setCitasHoy(dataAgenda);
+    } catch (error) {
+      console.error("Error cargando dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const [citasHoy, setCitasHoy] = useState([
-    { id: 101, hora: '09:00 AM', cliente: 'Ana García', servicio: 'Masaje Sueco', masajista: 'Elena Ríos', estado: 'pendiente' },
-    { id: 102, hora: '10:30 AM', cliente: 'Karla López', servicio: 'Facial Hidratante', masajista: 'Sofia Luna', estado: 'check-in' },
-    { id: 103, hora: '12:00 PM', cliente: 'Roberto Solis', servicio: 'Aromaterapia', masajista: 'Elena Ríos', estado: 'en-servicio' },
-  ]);
+  useEffect(() => {
+    cargarDatos();
+  }, [cargarDatos]);
+
+  // FILTRO DE BÚSQUEDA
+  const clientesFiltrados = clientes.filter(cliente => 
+    cliente.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.codigoUnico.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.telefono.includes(searchTerm)
+  );
 
   const getEstadoColor = (estado) => {
     switch(estado) {
@@ -150,19 +175,19 @@ const Dashboard = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {clientesEjemplo.map((cliente) => (
+                  {clientesFiltrados.map((cliente) => (
                     <TableRow key={cliente.id} sx={{ '&:hover': { bgcolor: '#FBF6CF22' } }}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar sx={{ bgcolor: '#936025', width: 32, height: 32 }}>{cliente.nombre[0]}</Avatar>
+                          <Avatar sx={{ bgcolor: '#936025', width: 32, height: 32 }}>{cliente.nombreCompleto?.[0]}</Avatar>
                           <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#54350D' }}>{cliente.nombre}</Typography>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#54350D' }}>{cliente.nombreCompleto}</Typography>
                             <Typography variant="caption" sx={{ color: '#BE7333' }}>{cliente.telefono}</Typography>
                           </Box>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Chip label={cliente.codigo} size="small" sx={{ bgcolor: '#54350D', color: '#FBF6CF', fontWeight: 'bold' }} />
+                        <Chip label={cliente.codigoUnico} size="small" sx={{ bgcolor: '#54350D', color: '#FBF6CF', fontWeight: 'bold' }} />
                       </TableCell>
                       <TableCell>
                         <Chip label={cliente.status} variant="outlined" size="small" sx={{ fontWeight: 'bold' }} />
@@ -214,15 +239,15 @@ const Dashboard = () => {
                     p: 2,    
                     borderRadius: 3, 
                     bgcolor: 'rgba(251, 246, 207, 0.05)', 
-                    borderLeft: `5px solid ${getEstadoColor(cita.estado)}`, 
+                    borderLeft: `5px solid ${getEstadoColor(cita.status)}`, 
                     transition: '0.3s', 
                     '&:hover': { bgcolor: 'rgba(251, 246, 207, 0.1)' } 
                   }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>
-                        <Typography variant="caption" sx={{ color: '#BE7333', fontWeight: 900, display: 'block' }}>{cita.hora}</Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FBF6CF', lineHeight: 1.2 }}>{cita.cliente}</Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.6, fontSize: '0.75rem' }}>{cita.servicio}</Typography>
+                        <Typography variant="caption" sx={{ color: '#BE7333', fontWeight: 900, display: 'block' }}>{cita.hora?.substring(0,5)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FBF6CF', lineHeight: 1.2 }}>{cita.cliente?.nombreCompleto}</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.6, fontSize: '0.75rem' }}>{cita.servicio?.nombre}</Typography>
                       </Box>
                       <IconButton size="small" sx={{ color: '#FBF6CF' }} onClick={(e) => handleMenuOpen(e, cita)}>
                         <MoreVert fontSize="inherit" />
@@ -264,8 +289,8 @@ const Dashboard = () => {
         <MenuItem onClick={handleMenuClose} sx={{ bgcolor: '#FBF6CF', fontWeight: 'bold' }}><ListItemIcon><LocalAtm fontSize="small" /></ListItemIcon> Cobrar</MenuItem>
       </Menu>
 
-      <RegistroCliente open={openRegistro} onClose={() => setOpenRegistro(false)} />
-      <AgendarCita open={openAgenda} onClose={() => setOpenAgenda(false)} clienteSeleccionado={selectedCliente} />
+      <RegistroCliente open={openRegistro} onClose={() => { setOpenRegistro(false); cargarDatos(); }} />
+      <AgendarCita open={openAgenda} onClose={() => setOpenAgenda(false)} clienteSeleccionado={selectedCliente} onCitaAgendada={cargarDatos} />
       <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} cliente={selectedCliente} />
       <CalendarioCompleto open={openCalendario} onClose={() => setOpenCalendario(false)} />
     </Box>

@@ -13,11 +13,12 @@ import {
 import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ usuario: '', password: '' });
-  const [error, setError] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState("");
   
   const navigate = useNavigate();
   const { login } = useAuth(); 
@@ -29,17 +30,25 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
     
-    if (formData.usuario === 'admin' && formData.password === '1234') {
-      login({ nombre: 'Administrador', rol: 'admin' });
-      navigate('/reservaciones');
-    } else if (formData.usuario === 'recepcion' && formData.password === '1234') {
-      login({ nombre: 'Secretaria', rol: 'empleado' });
-      navigate('/reservaciones');
-    } else {
-      setError(true);
+    try {
+      const response = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      const { token, user } = response.data;
+
+      login(user, token);
+      
+      navigate('/dashboard'); 
+
+    } catch (err) {
+      console.error("Error en login:", err);
+      setError(err.response?.data?.message || "Error al conectar con el servidor");
     }
   };
 
@@ -93,11 +102,12 @@ const Login = () => {
               margin="normal"
               required
               fullWidth
-              label="Usuario"
-              name="usuario"
+              label="Correo Electrónico"
+              name="email"
+              type="email"
               autoComplete="username"
               autoFocus
-              value={formData.usuario}
+              value={formData.email}
               onChange={handleChange}
             />
             <TextField

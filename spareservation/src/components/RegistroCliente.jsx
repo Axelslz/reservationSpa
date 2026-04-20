@@ -8,28 +8,39 @@ import {
   PersonAdd, Fingerprint, CheckCircleOutline, Close, 
   Badge, LocalPhone, MailOutline, ContentCopy 
 } from '@mui/icons-material';
+import { registrarNuevoCliente } from '../services/clientService';
 
 const RegistroCliente = ({ open, onClose }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [cliente, setCliente] = useState({ nombre: '', telefono: '', email: '' });
   const [codigoGenerado, setCodigoGenerado] = useState('');
 
   const handleChange = (e) => {
     setCliente({ ...cliente, [e.target.name]: e.target.value });
+    if (error) setError('');
   };
 
-  const manejarRegistro = () => {
+  const manejarRegistro = async () => {
     setLoading(true);
-    
-    setTimeout(() => {
-      const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-      const numPart = Math.floor(100 + Math.random() * 900);
-      const nuevoCodigo = `SPA-${randomPart}${numPart}`;
-      setCodigoGenerado(nuevoCodigo);
-      setLoading(false);
+    setError('');
+
+    try {
+      const data = await registrarNuevoCliente({
+        nombreCompleto: cliente.nombre, 
+        telefono: cliente.telefono,
+        email: cliente.email
+      });
+
+      setCodigoGenerado(data.codigoUnico);
       setStep(2);
-    }, 2000);
+    } catch (err) {
+      console.error("Error en registro:", err);
+      setError(err.error || err.message || "Error al registrar");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const reiniciarYSalir = () => {
@@ -68,6 +79,11 @@ const RegistroCliente = ({ open, onClose }) => {
           <Typography variant="h6" fontWeight="800">
             {step === 1 ? 'Membresía Nueva' : '¡Bienvenido a la Familia!'}
           </Typography>
+          {error && (
+            <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+              {error}
+            </Typography>
+          )}
         </Box>
         {step === 1 && (
           <IconButton onClick={onClose} sx={{ color: '#FBF6CF' }}>
