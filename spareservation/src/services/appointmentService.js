@@ -9,6 +9,15 @@ export const getAgendaHoy = async (fecha) => {
   }
 };
 
+export const getTodasLasCitas = async () => {
+  try {
+    const response = await api.get('/citas'); 
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al cargar todas las citas' };
+  }
+};
+
 export const cambiarEstadoCita = async (citaId, nuevoEstado) => {
   const response = await api.patch(`/citas/estado/${citaId}`, { status: nuevoEstado });
   return response.data;

@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
-  Paper, 
-  Container, 
-  InputAdornment, 
-  IconButton,
-  Alert
+  Box, TextField, Button, Typography, Paper, InputAdornment, IconButton, Alert 
 } from '@mui/material';
-import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
+import { Visibility, VisibilityOff, PersonOutline, LockOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -24,136 +16,158 @@ const Login = () => {
   const { login } = useAuth(); 
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); 
-    
     try {
       const response = await api.post('/auth/login', {
         email: formData.email,
         password: formData.password
       });
-
       const { token, user } = response.data;
-
       login(user, token);
-      
       navigate('/dashboard'); 
-
     } catch (err) {
-      console.error("Error en login:", err);
       setError(err.response?.data?.message || "Error al conectar con el servidor");
     }
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box 
+    <Box 
+      sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: 'linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url("https://res.cloudinary.com/dqozuofy6/image/upload/v1776882079/fondo_login_k3m60w.jpg")',
+        bgcolor: '#FDF7E7', 
+        p: 2 
+      }}
+    >
+      <Paper 
+        elevation={0} 
         sx={{ 
-          marginTop: 12, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center' 
+          p: { xs: 4, md: 6 }, 
+          width: '100%', 
+          maxWidth: 600, 
+          borderRadius: '20px', 
+          textAlign: 'center',
+          border: '1px solid #EAD8B1',
+          bgcolor: 'rgba(255, 255, 255, 0.6)',
+          backdropFilter: 'blur(10px)'
         }}
       >
-        <Paper 
-          elevation={10} 
-          sx={{ 
-            p: 4, 
-            width: '100%', 
-            borderRadius: 4,
-            borderTop: '5px solid #7b1fa2' 
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <Box 
-              sx={{ 
-                bgcolor: 'primary.main', 
-                color: 'white', 
-                p: 1.5, 
-                borderRadius: '50%', 
-                mb: 1 
-              }}
-            >
-              <LockOutlined />
-            </Box>
-            <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
-              Nexo
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Control de Seguridad Interno
-            </Typography>
-          </Box>
+        <Box sx={{ mb: 4 }}>
+          <Box 
+            component="img" 
+            src="/logo-nexo.png" 
+            sx={{ width: 80, mb: 1 }}
+            alt="Logo Nexo"
+            onError={(e) => e.target.style.display = 'none'}
+          />
+          <Typography variant="h4" sx={{ color: '#C5A059', fontWeight: '500', letterSpacing: 2, mb: 0.5, fontFamily: 'serif' }}>
+            NEXO
+          </Typography>
+          <Typography variant="overline" sx={{ color: '#D4AF37', letterSpacing: 4 }}>
+            LUXURY SPA
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 3, fontWeight: '400', color: '#333' }}>
+            Bienvenido de vuelta
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#666' }}>
+            Iniciar sesión para continuar
+          </Typography>
+        </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              Usuario o contraseña incorrectos
-            </Alert>
-          )}
-          
-          <form onSubmit={handleSubmit}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Correo Electrónico"
-              name="email"
-              type="email"
-              autoComplete="username"
-              autoFocus
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Contraseña"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{ 
-                mt: 3, 
-                mb: 2, 
-                borderRadius: 2,
-                textTransform: 'none',
-                fontSize: '1.1rem'
-              }}
-            >
-              Iniciar Sesión
-            </Button>
-          </form>
-        </Paper>
+        {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>{error}</Alert>}
         
-        <Typography variant="caption" color="textSecondary" sx={{ mt: 4 }}>
-          © 2026 Sistema de Reservaciones Seguro
-        </Typography>
-      </Box>
-    </Container>
+        <form onSubmit={handleSubmit}>
+          <Typography variant="body2" sx={{ textAlign: 'left', mb: 1, ml: 1, fontWeight: 'bold', color: '#444' }}>Usuario</Typography>
+          <TextField
+            fullWidth
+            placeholder="Ingresa tu usuario"
+            name="email"
+            variant="outlined"
+            value={formData.email}
+            onChange={handleChange}
+            sx={inputStyles}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonOutline sx={{ color: '#C5A059' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Typography variant="body2" sx={{ textAlign: 'left', mt: 3, mb: 1, ml: 1, fontWeight: 'bold', color: '#444' }}>Contraseña</Typography>
+          <TextField
+            fullWidth
+            placeholder="Ingresa tu contraseña"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            variant="outlined"
+            value={formData.password}
+            onChange={handleChange}
+            sx={inputStyles}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOutlined sx={{ color: '#C5A059' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ 
+              mt: 5, 
+              mb: 2, 
+              py: 1.5,
+              borderRadius: '12px',
+              bgcolor: '#4B5335', 
+              '&:hover': { bgcolor: '#3a4129' },
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 'bold'
+            }}
+          >
+            Iniciar Sesión
+          </Button>
+
+          <Typography variant="body2" sx={{ color: '#888', mt: 2, cursor: 'pointer', '&:hover': { color: '#C5A059' } }}>
+            ¿Olvidaste tu contraseña?
+          </Typography>
+        </form>
+      </Paper>
+    </Box>
   );
+};
+
+const inputStyles = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '30px',
+    backgroundColor: '#fff',
+    '& fieldset': { borderColor: '#EAD8B1' },
+    '&:hover fieldset': { borderColor: '#C5A059' },
+    '&.Mui-focused fieldset': { borderColor: '#C5A059' },
+  },
+  '& .MuiOutlinedInput-input': {
+    padding: '12px 14px',
+  }
 };
 
 export default Login;

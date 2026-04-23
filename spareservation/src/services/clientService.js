@@ -2,7 +2,6 @@ import api from './api';
 
 export const registrarNuevoCliente = async (clienteData) => {
   try {
-    // clienteData debe traer: nombreCompleto, telefono, email
     const response = await api.post('/clientes/registro', clienteData);
     return response.data;
   } catch (error) {

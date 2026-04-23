@@ -1,298 +1,176 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Box, CssBaseline, Button, Typography, TextField, InputAdornment, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  Chip, IconButton, Paper, Avatar, Menu, MenuItem, ListItemIcon
+  Box, Typography, TextField, Button, InputAdornment, 
+  Avatar, Paper, IconButton, Chip, Popover, List, ListItem, ListItemButton, ListItemText, ListItemIcon 
 } from '@mui/material';
 import { 
-  Search, AddCircle, EventAvailable, History, AccessTime, 
-  ContactPage, ArrowForwardIos, MoreVert, CheckCircle, 
-  PlayCircleOutline, DoneAll, Block, LocalAtm
+  Search, AddCircle, History, MoreVert, CalendarToday, 
+  Logout, EventAvailable 
 } from '@mui/icons-material';
+import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
+import { getTodosLosClientes } from '../services/clientService';
 import RegistroCliente from '../components/RegistroCliente';
 import AgendarCita from '../components/AgendarCita';
 import HistorialCliente from '../components/HistorialCliente';
-import CalendarioCompleto from '../components/CalendarioCompleto';
-import { getTodosLosClientes } from '../services/clientService';
-import { getAgendaHoy } from '../services/appointmentService';
+import CalendarioCompleto from '../components/CalendarioCompleto'; // Importante importar tu calendario
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-  
-  // ESTADOS PARA DATOS REALES
+  const { logout } = useAuth();
   const [clientes, setClientes] = useState([]);
-  const [citasHoy, setCitasHoy] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Estados de modales
-  const [openRegistro, setOpenRegistro] = useState(false);
-  const [openAgenda, setOpenAgenda] = useState(false);
-  const [openHistorial, setOpenHistorial] = useState(false);
-  const [selectedCliente, setSelectedCliente] = useState(null);
-  const [openCalendario, setOpenCalendario] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedCita, setSelectedCita] = useState(null);
+  const [openRegistro, setOpenRegistro] = useState(false);
+  const [openAgendar, setOpenAgendar] = useState(false);
+  const [openHistorial, setOpenHistorial] = useState(false);
+  const [openCalendario, setOpenCalendario] = useState(false); // Estado para el Calendario Maestro
+  const [selectedCliente, setSelectedCliente] = useState(null);
 
-  const handleMenuOpen = (event, cita) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedCita(cita);
+  const colors = {
+    olive: '#5B6346',
+    gold: '#C5A059',
+    cream: '#FDF7E7',
+    inputBg: '#E1D9C1'
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedCita(null);
-  };
-
-  // CARGA DE DATOS DESDE EL BACKEND
-  const cargarDatos = useCallback(async () => {
+  const fetchDatos = useCallback(async () => {
     try {
-      setLoading(true);
-      const [dataClientes, dataAgenda] = await Promise.all([
-        getTodosLosClientes(),
-        getAgendaHoy()
-      ]);
-      setClientes(dataClientes);
-      setCitasHoy(dataAgenda);
+      const data = await getTodosLosClientes();
+      setClientes(data);
     } catch (error) {
-      console.error("Error cargando dashboard:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error al cargar clientes:", error);
     }
   }, []);
 
   useEffect(() => {
-    cargarDatos();
-  }, [cargarDatos]);
+    fetchDatos();
+  }, [fetchDatos]);
 
-  // FILTRO DE BÚSQUEDA
-  const clientesFiltrados = clientes.filter(cliente => 
-    cliente.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.codigoUnico.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.telefono.includes(searchTerm)
-  );
-
-  const getEstadoColor = (estado) => {
-    switch(estado) {
-      case 'check-in': return '#4caf50'; 
-      case 'en-servicio': return '#2196f3'; 
-      case 'finalizada': return '#9e9e9e'; 
-      case 'no-asistio': return '#f44336'; 
-      default: return '#BE7333'; 
-    }
-  };
-
-  const handleOpenAgenda = (cliente) => {
+  const handleNuevaCita = (cliente) => {
     setSelectedCliente(cliente);
-    setOpenAgenda(true);
+    setOpenAgendar(true);
   };
 
-  const handleOpenHistorial = (cliente) => {
+  const handleVerHistorial = (cliente) => {
     setSelectedCliente(cliente);
     setOpenHistorial(true);
   };
 
+  const handleOpenPopover = (event) => setAnchorEl(event.currentTarget);
+  const handleClosePopover = () => setAnchorEl(null);
+
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#FBF6CF', minHeight: '100vh', width: '100vw', flexDirection: 'column' }}>
-      <CssBaseline />
-      <Navbar userName={user?.nombre} role={user?.rol} onLogout={logout} />
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: colors.cream }}>
       
-      <Box component="main" sx={{ 
-        flexGrow: 1, 
-        mt: '64px', 
-        p: { xs: 2, md: 3 }, 
-        height: { md: 'calc(100vh - 64px)' }, 
-        display: 'flex',
-        flexDirection: { xs: 'column', lg: 'row' }, 
-        gap: 3,
-        overflow: 'hidden'
-      }}> 
+      {/* SIDEBAR - Le pasamos la función para abrir el calendario */}
+      <Box sx={{ width: 260, display: 'flex', flexDirection: 'column', bgcolor: colors.olive, flexShrink: 0 }}>
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: colors.gold, letterSpacing: 2, fontFamily: 'serif' }}>NEXO</Typography>
+          <Typography variant="caption" sx={{ color: colors.gold, letterSpacing: 3, display: 'block', mt: -0.5 }}>LUXURY SPA</Typography>
+        </Box>
+        <Sidebar onCalendarClick={() => setOpenCalendario(true)} />
+      </Box>
+
+      {/* CONTENIDO PRINCIPAL */}
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         
-        <Box sx={{ 
-          flex: { lg: '0 0 60%' }, 
-          display: 'flex', 
-          flexDirection: 'column',
-          height: '100%'
-        }}>
-          <Paper sx={{ 
-            p: { xs: 2, md: 4 }, 
-            borderRadius: 5, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            height: '100%', 
-            boxShadow: '0 10px 40px rgba(84, 53, 13, 0.05)', 
-            bgcolor: '#fff', 
-            overflow: 'hidden' 
-          }}>
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' }, 
-              justifyContent: 'space-between', 
-              alignItems: { xs: 'flex-start', sm: 'center' }, 
-              mb: 4,
-              gap: 2
-            }}>
+        {/* HEADER */}
+        <Box sx={{ height: 90, bgcolor: colors.olive, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: 4 }}>
+          <Box onClick={handleOpenPopover} sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer' }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                <Avatar sx={{ bgcolor: colors.gold, width: 32, height: 32 }}>U</Avatar>
+                <Typography variant="body2" sx={{ color: colors.gold, fontWeight: 'bold' }}>USUARIO</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>Miércoles 15 De Abril</Typography>
+                <CalendarToday sx={{ fontSize: 12, color: colors.gold }} />
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* ÁREA DE DIRECTORIO */}
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: '40px 60px' }, overflow: 'hidden' }}>
+          <Box sx={{ flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 900, color: '#54350D', letterSpacing: '-0.5px', fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                  Directorio de Clientes
-                </Typography>
-                <Typography variant="body1" sx={{ color: '#936025', opacity: 0.8 }}>
-                  Gestiona tu base de datos y agenda citas rápidas
-                </Typography>
+                <Typography variant="h4" sx={{ fontFamily: 'serif', color: '#333', fontWeight: 500 }}>Directorio de Clientes</Typography>
+                <Typography variant="body2" sx={{ color: colors.gold }}>Gestiona tus citas y los datos de tus clientes</Typography>
               </Box>
               <Button 
                 variant="contained" 
-                startIcon={<AddCircle />} 
+                startIcon={<AddCircle />}
                 onClick={() => setOpenRegistro(true)} 
-                sx={{ 
-                  bgcolor: '#936025', borderRadius: 3, px: 4, py: 1.5, fontWeight: 'bold',
-                  '&:hover': { bgcolor: '#54350D' } 
-                }}
+                sx={{ bgcolor: '#444B31', borderRadius: '20px', textTransform: 'none', px: 3, py: 0.8 }}
               >
-                Nuevo Cliente
+                NUEVO CLIENTE
               </Button>
             </Box>
 
-            <TextField 
-              fullWidth 
-              placeholder="Buscar por nombre, código o teléfono..." 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#936025' }} /></InputAdornment> }}
-              sx={{ mb: 4, '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#FBF6CF44' } }}
+            <TextField
+              fullWidth
+              placeholder="Buscar por nombre, código o teléfono"
+              sx={{ mb: 4, '& .MuiOutlinedInput-root': { borderRadius: '50px', bgcolor: colors.inputBg, height: '45px' }, '& fieldset': { border: 'none' } }}
+              InputProps={{ startAdornment: (<InputAdornment position="start"><Search sx={{ color: '#777', ml: 1 }} /></InputAdornment>) }}
             />
 
-            <TableContainer sx={{ flexGrow: 1, overflowY: 'auto' }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ bgcolor: '#fff', color: '#54350D', fontWeight: 800 }}>CLIENTE</TableCell>
-                    <TableCell sx={{ bgcolor: '#fff', color: '#54350D', fontWeight: 800 }}>CÓDIGO</TableCell>
-                    <TableCell sx={{ bgcolor: '#fff', color: '#54350D', fontWeight: 800 }}>ESTADO</TableCell>
-                    <TableCell align="center" sx={{ bgcolor: '#fff', color: '#54350D', fontWeight: 800 }}>ACCIONES</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {clientesFiltrados.map((cliente) => (
-                    <TableRow key={cliente.id} sx={{ '&:hover': { bgcolor: '#FBF6CF22' } }}>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar sx={{ bgcolor: '#936025', width: 32, height: 32 }}>{cliente.nombreCompleto?.[0]}</Avatar>
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#54350D' }}>{cliente.nombreCompleto}</Typography>
-                            <Typography variant="caption" sx={{ color: '#BE7333' }}>{cliente.telefono}</Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip label={cliente.codigoUnico} size="small" sx={{ bgcolor: '#54350D', color: '#FBF6CF', fontWeight: 'bold' }} />
-                      </TableCell>
-                      <TableCell>
-                        <Chip label={cliente.status} variant="outlined" size="small" sx={{ fontWeight: 'bold' }} />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton onClick={() => handleOpenAgenda(cliente)} sx={{ color: '#936025' }} size="small"><EventAvailable fontSize="small" /></IconButton>
-                        <IconButton onClick={() => handleOpenHistorial(cliente)} sx={{ color: '#BE7333' }} size="small"><History fontSize="small" /></IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Box>
+            <Box sx={{ display: 'flex', px: 3, mb: 2 }}>
+              <Typography sx={{ flex: 2, color: colors.gold, fontWeight: 'bold', fontSize: '0.8rem' }}>CLIENTES</Typography>
+              <Typography sx={{ flex: 1, color: colors.gold, fontWeight: 'bold', fontSize: '0.8rem', textAlign: 'center' }}>CÓDIGO</Typography>
+              <Typography sx={{ flex: 1, color: colors.gold, fontWeight: 'bold', fontSize: '0.8rem', textAlign: 'center' }}>ESTADO</Typography>
+              <Typography sx={{ flex: 1, color: colors.gold, fontWeight: 'bold', fontSize: '0.8rem', textAlign: 'center' }}>ACCIONES</Typography>
+            </Box>
+          </Box>
 
-        <Box sx={{ 
-          flexGrow: 1, 
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}>
-          <Paper sx={{ 
-            height: '100%', 
-            borderRadius: 6, 
-            bgcolor: '#54350D', 
-            color: '#FBF6CF', 
-            p: { xs: 3, md: 4 }, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            boxShadow: '0 15px 50px rgba(0,0,0,0.2)'
+          {/* LISTA CON SCROLL */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            overflowY: 'auto', 
+            pr: 1,
+            '&::-webkit-scrollbar': { width: '8px' },
+            '&::-webkit-scrollbar-thumb': { background: colors.gold, borderRadius: '10px' },
           }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AccessTime sx={{ fontSize: 22 }} /> Agenda de Hoy
-              </Typography>
-              <Chip 
-                label={`${citasHoy.length} Citas`} 
-                size="small"
-                sx={{ bgcolor: '#FBF6CF', color: '#54350D', fontWeight: 'bold' }} 
-              />
-            </Box>
-            
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
-              {citasHoy.length > 0 ? (
-                citasHoy.map((cita) => (
-                  <Paper key={cita.id} sx={{ 
-                    mb: 2, 
-                    p: 2,    
-                    borderRadius: 3, 
-                    bgcolor: 'rgba(251, 246, 207, 0.05)', 
-                    borderLeft: `5px solid ${getEstadoColor(cita.status)}`, 
-                    transition: '0.3s', 
-                    '&:hover': { bgcolor: 'rgba(251, 246, 207, 0.1)' } 
-                  }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="caption" sx={{ color: '#BE7333', fontWeight: 900, display: 'block' }}>{cita.hora?.substring(0,5)}</Typography>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#FBF6CF', lineHeight: 1.2 }}>{cita.cliente?.nombreCompleto}</Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.6, fontSize: '0.75rem' }}>{cita.servicio?.nombre}</Typography>
-                      </Box>
-                      <IconButton size="small" sx={{ color: '#FBF6CF' }} onClick={(e) => handleMenuOpen(e, cita)}>
-                        <MoreVert fontSize="inherit" />
-                      </IconButton>
-                    </Box>
-                  </Paper>
-                ))
-              ) : (
-                <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', opacity: 0.4 }}>
-                  <ContactPage sx={{ fontSize: 50, mb: 1 }} />
-                  <Typography variant="body2">No hay citas agendadas</Typography>
+            {clientes.map((cliente) => (
+              <Paper key={cliente._id} elevation={0} sx={{ p: 1.5, mb: 1, borderRadius: '12px', display: 'flex', alignItems: 'center', bgcolor: 'rgba(255,255,255,0.6)', border: '1px solid #EBE4D1' }}>
+                <Box sx={{ flex: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: '#EAD8B1', color: colors.gold }}>{cliente.nombreCompleto?.[0]}</Avatar>
+                  <Typography sx={{ fontWeight: 'bold' }}>{cliente.nombreCompleto}</Typography>
                 </Box>
-              )}
-            </Box>
-
-            <Button 
-              fullWidth 
-              variant="outlined" 
-              onClick={() => setOpenCalendario(true)} 
-              endIcon={<ArrowForwardIos sx={{ fontSize: 12 }} />} 
-              sx={{ 
-                color: '#FBF6CF', borderColor: 'rgba(251, 246, 207, 0.3)', mt: 2, py: 1.5, 
-                borderRadius: 3, fontWeight: 'bold', fontSize: '0.8rem',
-                '&:hover': { borderColor: '#FBF6CF', bgcolor: 'rgba(251, 246, 207, 0.1)' }
-              }}
-            >
-              VER CALENDARIO COMPLETO
-            </Button>
-          </Paper>
+                <Typography sx={{ flex: 1, textAlign: 'center' }}>{cliente.codigoUnico}</Typography>
+                <Box sx={{ flex: 1, textAlign: 'center' }}>
+                   <Chip label="Activo" size="small" variant="outlined" sx={{ borderColor: colors.gold, color: colors.gold }} />
+                </Box>
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+                  <IconButton onClick={() => handleNuevaCita(cliente)} sx={{ color: colors.gold }}><EventAvailable fontSize="small"/></IconButton>
+                  <IconButton onClick={() => handleVerHistorial(cliente)} sx={{ color: colors.gold }}><History fontSize="small"/></IconButton>
+                  <IconButton size="small"><MoreVert fontSize="small"/></IconButton>
+                </Box>
+              </Paper>
+            ))}
+          </Box>
         </Box>
-
       </Box>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} PaperProps={{ sx: { borderRadius: 3, minWidth: 180 } }}>
-        <MenuItem onClick={handleMenuClose}><ListItemIcon><CheckCircle fontSize="small" color="success" /></ListItemIcon> Check-in</MenuItem>
-        <MenuItem onClick={handleMenuClose}><ListItemIcon><PlayCircleOutline fontSize="small" color="primary" /></ListItemIcon> Iniciar</MenuItem>
-        <MenuItem onClick={handleMenuClose}><ListItemIcon><DoneAll fontSize="small" /></ListItemIcon> Finalizar</MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}><ListItemIcon><Block fontSize="small" color="error" /></ListItemIcon> No asistió</MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={{ bgcolor: '#FBF6CF', fontWeight: 'bold' }}><ListItemIcon><LocalAtm fontSize="small" /></ListItemIcon> Cobrar</MenuItem>
-      </Menu>
+      {/* MODALES Y COMPONENTES EXTERNOS */}
+      <RegistroCliente open={openRegistro} onClose={() => setOpenRegistro(false)} onSuccess={fetchDatos} />
+      
+      {/* CALENDARIO MAESTRO (Modal) */}
+      <CalendarioCompleto 
+        open={openCalendario} 
+        onClose={() => setOpenCalendario(false)} 
+      />
 
-      <RegistroCliente open={openRegistro} onClose={() => { setOpenRegistro(false); cargarDatos(); }} />
-      <AgendarCita open={openAgenda} onClose={() => setOpenAgenda(false)} clienteSeleccionado={selectedCliente} onCitaAgendada={cargarDatos} />
-      <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} cliente={selectedCliente} />
-      <CalendarioCompleto open={openCalendario} onClose={() => setOpenCalendario(false)} />
+      {selectedCliente && (
+        <>
+          <AgendarCita open={openAgendar} onClose={() => setOpenAgendar(false)} cliente={selectedCliente} />
+          <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} clienteId={selectedCliente._id} />
+        </>
+      )}
+
+      {/* POPOVER PERFIL */}
+      <Popover open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={handleClosePopover} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <List sx={{ p: 0, width: 160 }}><ListItem disablePadding><ListItemButton onClick={logout}><ListItemIcon sx={{ minWidth: 35 }}><Logout fontSize="small" /></ListItemIcon><ListItemText primary="Cerrar Sesión" /></ListItemButton></ListItem></List>
+      </Popover>
     </Box>
   );
 };
