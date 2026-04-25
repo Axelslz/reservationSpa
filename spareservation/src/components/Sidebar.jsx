@@ -1,13 +1,16 @@
 import React from 'react';
 import { 
-  Box, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText 
+  Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Drawer, IconButton, Typography, Divider
 } from '@mui/material';
-import { Contacts, CalendarMonth, AccessTime } from '@mui/icons-material';
+import { Contacts, CalendarMonth, AccessTime, Close } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const Sidebar = ({ onCalendarClick }) => {
+const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const drawerWidth = 260;
 
   const colors = {
     gold: '#C5A059',
@@ -17,50 +20,64 @@ const Sidebar = ({ onCalendarClick }) => {
 
   const menuItems = [
     { text: 'Directorio', icon: <Contacts />, path: '/reservaciones' },
-    { text: 'Calendario', icon: <CalendarMonth />, action: 'calendar' }, // Marcado como acción
+    { text: 'Calendario', icon: <CalendarMonth />, action: 'calendar' },
     { text: 'Cita del día', icon: <AccessTime />, path: '/citas-dia' },
   ];
 
-  return (
-    <Box sx={{ 
-      width: 260, 
-      bgcolor: colors.sidebar, 
-      display: 'flex', 
-      flexDirection: 'column',
-      height: '100%', 
-      borderRight: '1px solid rgba(0,0,0,0.1)'
-    }}>
-      <List sx={{ mt: 2, px: 1 }}>
-        {menuItems.map((item) => {
+  const visibleItems = menuItems; 
+
+  const drawerContent = (
+    <Box sx={{ bgcolor: colors.sidebar, height: '100%', display: 'flex', flexDirection: 'column', color: 'white' }}>
+      
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', p: 3, minHeight: '90px' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: colors.gold, letterSpacing: 2, fontFamily: 'serif' }}>
+            NEXO
+          </Typography>
+          <Typography variant="caption" sx={{ color: colors.gold, letterSpacing: 3, display: 'block', mt: -0.5 }}>
+            LUXURY SPA
+          </Typography>
+        </Box>
+        
+        <IconButton 
+          onClick={onDrawerToggle} 
+          sx={{ color: colors.gold, display: { md: 'none' }, position: 'absolute', right: 8, top: 8 }}
+        >
+          <Close />
+        </IconButton>
+      </Box>
+
+      <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)', mb: 2 }} />
+
+      {/* LISTA DE BOTONES */}
+      <List sx={{ px: 1 }}>
+        {visibleItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
               <ListItemButton 
                 onClick={() => {
-                  if (item.action === 'calendar') {
-                    onCalendarClick(); // Abre el modal en lugar de navegar
-                  } else {
-                    navigate(item.path);
-                  }
+                  if (item.action === 'calendar') onCalendarClick();
+                  else navigate(item.path);
+                  if (mobileOpen) onDrawerToggle(); 
                 }}
                 sx={{ 
-                  borderRadius: '50px 0 0 50px', 
-                  ml: 1,
+                  borderRadius: '10px',
+                  mx: 1,
                   bgcolor: isActive ? colors.activeBg : 'transparent',
-                  color: isActive ? colors.gold : 'white',
-                  '&:hover': { bgcolor: isActive ? colors.activeBg : 'rgba(255,255,255,0.05)' },
-                  border: isActive ? `1px solid ${colors.gold}` : '1px solid transparent',
-                  transition: '0.3s'
+                  color: isActive ? colors.sidebar : 'white', 
+                  '&:hover': { bgcolor: isActive ? colors.activeBg : 'rgba(255,255,255,0.08)' },
+                  transition: '0.2s'
                 }}
               >
-                <ListItemIcon sx={{ color: isActive ? colors.gold : 'white', minWidth: 40 }}>
+                <ListItemIcon sx={{ color: isActive ? colors.sidebar : colors.gold, minWidth: 40 }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText 
                   primary={item.text} 
                   primaryTypographyProps={{ 
-                    fontSize: '1.1rem', 
-                    fontWeight: isActive ? '500' : '300',
+                    fontSize: '0.95rem', 
+                    fontWeight: isActive ? '700' : '400' 
                   }} 
                 />
               </ListItemButton>
@@ -68,6 +85,36 @@ const Sidebar = ({ onCalendarClick }) => {
           );
         })}
       </List>
+    </Box>
+  );
+
+  return (
+    <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
+      {/* VERSIÓN MÓVIL */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{ 
+          display: { xs: 'block', md: 'none' }, 
+          '& .MuiDrawer-paper': { width: drawerWidth, border: 'none', bgcolor: colors.sidebar } 
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+
+      {/* VERSIÓN ESCRITORIO (FIJO) */}
+      <Drawer
+        variant="permanent"
+        sx={{ 
+          display: { xs: 'none', md: 'block' }, 
+          '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box', border: 'none', position: 'fixed' } 
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
     </Box>
   );
 };

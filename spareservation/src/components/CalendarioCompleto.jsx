@@ -32,7 +32,7 @@ const CalendarioCompleto = ({ open, onClose }) => {
       const data = await getTodasLasCitas(); 
       const formattedEvents = data.map(cita => ({
         id: cita._id,
-        title: cita.clienteId?.nombreCompleto || 'Cita', 
+        title: cita.cliente?.nombreCompleto || 'Cita', 
         start: cita.fecha, 
         backgroundColor: '#E3F2FD', 
         textColor: '#2196F3',
@@ -45,6 +45,8 @@ const CalendarioCompleto = ({ open, onClose }) => {
 
   useEffect(() => {
     if (open) {
+      document.getSelection()?.removeAllRanges();
+      
       const timer = setTimeout(() => {
         setShouldRenderCalendar(true);
         fetchCitas();
@@ -95,7 +97,7 @@ const CalendarioCompleto = ({ open, onClose }) => {
         bgcolor: colors.cream,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden' // ELIMINA SCROLL EXTERIOR
+        overflow: 'hidden' 
       }}>
         <Paper 
           elevation={0} 
@@ -107,13 +109,13 @@ const CalendarioCompleto = ({ open, onClose }) => {
             flexGrow: 1,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden', // ELIMINA SCROLL DEL CONTENEDOR BLANCO
+            overflow: 'hidden', 
             '& .fc': { 
               fontFamily: 'inherit',
-              height: '100% !important', // FUERZA EL ALTO
+              height: '100% !important', 
             },
             '& .fc-scroller': {
-              overflow: 'hidden !important' // ELIMINA SCROLL INTERNO DE FULLCALENDAR
+              overflow: 'hidden !important' 
             },
             '& .fc-toolbar-title': { 
                 color: colors.gold, 
@@ -135,8 +137,8 @@ const CalendarioCompleto = ({ open, onClose }) => {
                   initialView="dayGridMonth"
                   locale={esLocale}
                   events={events}
-                  height="100%" // OCUPA TODO EL ESPACIO DISPONIBLE
-                  aspectRatio={2} // HACE LAS CELDAS MÁS COMPACTAS PARA QUE QUEPAN
+                  height="100%" 
+                  aspectRatio={2} 
                   stickyHeaderDates={true}
                   headerToolbar={{
                     left: 'prev,next today',

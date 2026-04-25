@@ -11,7 +11,8 @@ export const getAgendaHoy = async (fecha) => {
 
 export const getTodasLasCitas = async () => {
   try {
-    const response = await api.get('/citas'); 
+    // CAMBIO AQUÍ: Agregamos '/dashboard' a la ruta
+    const response = await api.get('/citas/dashboard'); 
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error al cargar todas las citas' };
@@ -19,6 +20,11 @@ export const getTodasLasCitas = async () => {
 };
 
 export const cambiarEstadoCita = async (citaId, nuevoEstado) => {
-  const response = await api.patch(`/citas/estado/${citaId}`, { status: nuevoEstado });
-  return response.data;
+  try {
+    const response = await api.patch(`/citas/estado/${citaId}`, { status: nuevoEstado });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al cambiar el estado' };
+  }
 };
+
