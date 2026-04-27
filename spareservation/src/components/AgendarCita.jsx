@@ -53,17 +53,17 @@ const AgendarCita = ({ open, onClose, cliente, onCitaAgendada }) => {
     try {
       const dataAEnviar = {
         clienteId: cliente._id || cliente.id,
-        masajistaId: cita.masajistaId,
+        especialistaId: cita.masajistaId, 
         servicioId: cita.servicioId,
         fecha: fechaSeleccionada.toISOString().split('T')[0],
-        hora: cita.hora,
-        status: 'pendiente'
+        hora: cita.hora
       };
-      await api.post('/citas', dataAEnviar);
+      await api.post('/citas/agendar', dataAEnviar);
       onCitaAgendada?.();
       onClose();
     } catch (error) {
       alert("Error al agendar");
+      console.error(error);
     } finally { setLoading(false); }
   };
 

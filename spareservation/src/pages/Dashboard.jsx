@@ -194,7 +194,7 @@ const Dashboard = () => {
       {selectedCliente && (
         <>
           <AgendarCita open={openAgendar} onClose={() => setOpenAgendar(false)} cliente={selectedCliente} />
-          <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} clienteId={selectedCliente._id} />
+          <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} cliente={selectedCliente} />
         </>
       )}
 
