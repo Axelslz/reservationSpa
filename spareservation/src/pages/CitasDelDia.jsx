@@ -3,14 +3,16 @@ import {
   Box, Typography, Paper, Select, MenuItem, Button,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar, IconButton,
   Popover, List, ListItem, ListItemButton, ListItemText, ListItemIcon,
-  useMediaQuery, useTheme
+  useMediaQuery, useTheme, Divider
 } from '@mui/material';
 import { 
   ChevronLeft, ChevronRight, PersonOutline, Menu as MenuIcon, 
-  CalendarToday, Logout 
+  CalendarToday, Logout, Visibility, AccessTime, AttachMoney, 
+  Spa, AssignmentInd 
 } from '@mui/icons-material';
 import { getAgendaHoy, cambiarEstadoCita } from '../services/appointmentService';
 import Sidebar from '../components/Sidebar';
+import CalendarioCompleto from '../components/CalendarioCompleto';
 import { useAuth } from '../context/AuthContext';
 
 // Paleta de colores
@@ -39,7 +41,7 @@ const getStatusColor = (status) => {
 const CitasDelDia = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { user, logout } = useAuth(); // Agregamos logout
+  const { user, logout } = useAuth();
   
   const isAdmin = user?.role === 'admin'; 
 
@@ -48,13 +50,17 @@ const CitasDelDia = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openCalendario, setOpenCalendario] = useState(false);
   
   // Estado para el Popover del perfil (Cerrar sesión)
   const [anchorEl, setAnchorEl] = useState(null);
 
+  // ESTADOS PARA EL POPOVER DE INFORMACIÓN DE LA CITA
+  const [infoAnchorEl, setInfoAnchorEl] = useState(null);
+  const [citaSeleccionada, setCitaSeleccionada] = useState(null);
+
   const fechaFormateada = selectedDate.toISOString().split('T')[0];
 
-  // Fecha dinámica para el Navbar superior
   const fechaHoy = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   const fechaHeader = fechaHoy.charAt(0).toUpperCase() + fechaHoy.slice(1);
 
@@ -93,7 +99,17 @@ const CitasDelDia = () => {
   const handleOpenPopover = (event) => setAnchorEl(event.currentTarget);
   const handleClosePopover = () => setAnchorEl(null);
 
-  // --- LÓGICA DEL CALENDARIO VISUAL ---
+  // MANEJADORES DEL POPOVER DE INFO
+  const handleOpenInfo = (event, cita) => {
+    console.log("Datos de la cita seleccionada:", cita);
+    setCitaSeleccionada(cita);
+    setInfoAnchorEl(event.currentTarget);
+  };
+  const handleCloseInfo = () => {
+    setInfoAnchorEl(null);
+    setCitaSeleccionada(null);
+  };
+
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -128,38 +144,20 @@ const CitasDelDia = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: colors.cream, position: 'relative' }}>
       
-      {/* SIDEBAR SOLO PARA ADMIN */}
       {isAdmin && (
         <Box sx={{ width: { md: 260 }, flexShrink: 0 }}>
           <Sidebar 
             mobileOpen={mobileOpen} 
             onDrawerToggle={handleDrawerToggle} 
-            onCalendarClick={() => {}} 
+            onCalendarClick={() => setOpenCalendario(true)} 
           />
         </Box>
       )}
 
-      {/* CONTENEDOR PRINCIPAL */}
-      <Box component="main" sx={{ 
-        flexGrow: 1, 
-        height: '100vh',
-        display: 'flex', 
-        flexDirection: 'column',
-        minWidth: 0, 
-        overflowX: 'hidden'
-      }}>
+      <Box component="main" sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
         
-        {/* ================= HEADER (COPIADO DEL DASHBOARD) ================= */}
-        <Box sx={{ 
-          height: 90, 
-          bgcolor: colors.olive, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          px: { xs: 2, md: 4 },
-          flexShrink: 0,
-          zIndex: 10
-        }}>
+        {/* HEADER */}
+        <Box sx={{ height: 90, bgcolor: colors.olive, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 2, md: 4 }, flexShrink: 0, zIndex: 10 }}>
           <Box>
             {isAdmin && isMobile && (
               <IconButton onClick={handleDrawerToggle} sx={{ color: colors.gold }}>
@@ -167,7 +165,6 @@ const CitasDelDia = () => {
               </IconButton>
             )}
           </Box>
-
           <Box onClick={handleOpenPopover} sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer' }}>
             <Box sx={{ textAlign: 'right' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
@@ -188,37 +185,33 @@ const CitasDelDia = () => {
           </Box>
         </Box>
 
-        {/* ================= CONTENIDO INTERNO: CITAS Y RESUMEN ================= */}
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden' }}>
+        {/* CONTENIDO INTERNO (Con scroll ajustado para móviles) */}
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflowY: { xs: 'auto', md: 'hidden' }, overflowX: 'hidden' }}>
           
-          {/* COLUMNA IZQUIERDA: TABLA (Con Scroll) */}
-          <Box sx={{ flexGrow: 1, p: { xs: 2, md: 6 }, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-            
+          {/* TABLA PRINCIPAL (Ajustada para no encogerse en móviles) */}
+          <Box sx={{ flexGrow: 1, flexShrink: { xs: 0, md: 1 }, p: { xs: 2, md: 6 }, display: 'flex', flexDirection: 'column', overflowY: { xs: 'visible', md: 'auto' } }}>
             <Typography variant="h4" sx={{ color: colors.text, fontWeight: 500, fontFamily: 'serif', mb: 4, letterSpacing: 1 }}>
               {isAdmin ? 'Citas del Día' : `Tus Citas: ${fechaFormateada.split('-').reverse().join('-')}`}
             </Typography>
 
-            <TableContainer 
-              component={Paper} 
-              elevation={0} 
-              sx={{ border: `2px solid ${colors.gold}`, borderRadius: 2, bgcolor: colors.white }}
-            >
+            <TableContainer component={Paper} elevation={0} sx={{ border: `2px solid ${colors.gold}`, borderRadius: 2, bgcolor: colors.white }}>
               <Table sx={{ '& th, & td': { borderBottom: `1px solid ${colors.cream}` } }}>
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important` }}>NOMBRE</TableCell>
-                    <TableCell sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important` }}>CITA</TableCell>
-                    <TableCell sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important`, textAlign: 'center' }}>ESTADO</TableCell>
+                    <TableCell sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important` }}>FECHA</TableCell>
+                    <TableCell align="center" sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important` }}>ESTADO</TableCell>
+                    <TableCell align="center" sx={{ color: colors.gold, fontWeight: 'bold', borderBottom: `2px solid ${colors.gold} !important` }}>INFO</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={3} align="center" sx={{ py: 3 }}>Cargando...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} align="center" sx={{ py: 3 }}>Cargando...</TableCell></TableRow>
                   ) : citas.length === 0 ? (
-                    <TableRow><TableCell colSpan={3} align="center" sx={{ py: 3 }}>No hay citas para esta fecha.</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} align="center" sx={{ py: 3 }}>No hay citas para esta fecha.</TableCell></TableRow>
                   ) : (
                     citas.map((cita) => (
-                      <TableRow key={cita.id || cita._id}>
+                      <TableRow key={cita.id || cita._id} hover>
                         <TableCell sx={{ fontWeight: 'bold', color: colors.text }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Avatar sx={{ bgcolor: colors.cream, color: colors.gold }}><PersonOutline /></Avatar>
@@ -248,6 +241,14 @@ const CitasDelDia = () => {
                             <MenuItem value="Cancelada">Cancelada</MenuItem>
                           </Select>
                         </TableCell>
+                        <TableCell align="center">
+                          <IconButton 
+                            onClick={(e) => handleOpenInfo(e, cita)}
+                            sx={{ color: colors.olive, '&:hover': { color: colors.gold, bgcolor: colors.cream } }}
+                          >
+                            <Visibility />
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -256,17 +257,8 @@ const CitasDelDia = () => {
             </TableContainer>
           </Box>
 
-          {/* COLUMNA DERECHA: SIDEBAR VERDE OLIVA (Con Scroll) */}
-          <Box sx={{ 
-            width: { xs: '100%', md: '380px' }, 
-            bgcolor: colors.olive, 
-            p: 4, display: 'flex', 
-            flexDirection: 'column',
-            flexShrink: 0,
-            overflowY: 'auto',
-            borderLeft: `1px solid rgba(255,255,255,0.1)`
-          }}>
-            
+          {/* SIDEBAR VERDE OLIVA (Resumen y Calendario) */}
+          <Box sx={{ width: { xs: '100%', md: '380px' }, bgcolor: colors.olive, p: 4, display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', borderLeft: `1px solid rgba(255,255,255,0.1)` }}>
             <Box sx={{ border: `1px solid ${colors.gold}`, borderRadius: 3, p: 2, mb: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, color: 'white' }}>
                 <IconButton onClick={handlePrevMonth} sx={{ color: 'white' }} size="small"><ChevronLeft /></IconButton>
@@ -289,20 +281,15 @@ const CitasDelDia = () => {
                 <Box key={`resumen-${cita.id || cita._id}`} sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'white' }}>
                   <Avatar sx={{ bgcolor: 'transparent', border: '1px solid white', width: 35, height: 35, mr: 2 }}><PersonOutline fontSize="small" /></Avatar>
                   <Typography sx={{ flexGrow: 1, fontSize: '0.95rem' }}>{cita.cliente?.nombreCompleto || 'Cliente'}</Typography>
-                  <Typography sx={{ fontSize: '0.9rem' }}>{cita.hora}</Typography>
+                  <Typography sx={{ fontSize: '0.9rem' }}>{cita.hora.substring(0, 5)}</Typography>
                 </Box>
               ))}
             </Box>
 
-            {/* ESTE BOTÓN SOLO LO VE EL ADMIN */}
             {isAdmin && (
               <Button 
                 variant="contained" 
-                sx={{ 
-                  bgcolor: colors.gold, color: 'white', mt: 4, alignSelf: 'center',
-                  borderRadius: '20px', textTransform: 'none', px: 4, py: 1,
-                  '&:hover': { bgcolor: '#B08D4C' }
-                }}
+                sx={{ bgcolor: colors.gold, color: 'white', mt: 4, alignSelf: 'center', borderRadius: '20px', textTransform: 'none', px: 4, py: 1, '&:hover': { bgcolor: '#B08D4C' } }}
               >
                 Agregar Cita
               </Button>
@@ -311,7 +298,10 @@ const CitasDelDia = () => {
         </Box>
       </Box>
 
-      {/* POPOVER PERFIL (Igual que en Dashboard) */}
+      {/* COMPONENTES FLOTANTES */}
+      <CalendarioCompleto open={openCalendario} onClose={() => setOpenCalendario(false)} />
+
+      {/* POPOVER CERRAR SESIÓN */}
       <Popover 
         open={Boolean(anchorEl)} 
         anchorEl={anchorEl} 
@@ -327,6 +317,69 @@ const CitasDelDia = () => {
             </ListItemButton>
           </ListItem>
         </List>
+      </Popover>
+
+      {/* POPOVER INFORMACIÓN DE LA CITA */}
+      <Popover
+        open={Boolean(infoAnchorEl)}
+        anchorEl={infoAnchorEl}
+        onClose={handleCloseInfo}
+        anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'center', horizontal: 'right' }}
+        PaperProps={{
+          sx: { borderRadius: 3, width: 320, p: 2, border: `1px solid ${colors.gold}`, boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }
+        }}
+      >
+        {citaSeleccionada && (
+          <Box>
+            <Typography variant="h6" sx={{ color: colors.olive, fontWeight: 'bold', mb: 1, fontFamily: 'serif' }}>
+              Detalles de la Cita
+            </Typography>
+            <Divider sx={{ mb: 2, borderColor: colors.cream }} />
+
+            <List disablePadding sx={{ '& .MuiListItem-root': { py: 1, px: 0 } }}>
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 35 }}><AccessTime sx={{ color: colors.gold }} /></ListItemIcon>
+                <ListItemText 
+                  primary="Horario" 
+                  secondary={citaSeleccionada.hora ? citaSeleccionada.hora.substring(0, 5) : 'No asignado'} 
+                  primaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                  secondaryTypographyProps={{ variant: 'body1', color: colors.text, fontWeight: '500' }}
+                />
+              </ListItem>
+              
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 35 }}><Spa sx={{ color: colors.gold }} /></ListItemIcon>
+                <ListItemText 
+                  primary="Servicio" 
+                  secondary={citaSeleccionada.servicio?.nombre || 'No especificado'} 
+                  primaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                  secondaryTypographyProps={{ variant: 'body1', color: colors.text, fontWeight: '500' }}
+                />
+              </ListItem>
+
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 35 }}><AttachMoney sx={{ color: colors.gold }} /></ListItemIcon>
+                <ListItemText 
+                  primary="Precio" 
+                  secondary={citaSeleccionada.servicio?.precio ? `$${citaSeleccionada.servicio.precio} MXN` : 'N/A'} 
+                  primaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                  secondaryTypographyProps={{ variant: 'body1', color: colors.text, fontWeight: '500' }}
+                />
+              </ListItem>
+
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 35 }}><AssignmentInd sx={{ color: colors.gold }} /></ListItemIcon>
+                <ListItemText 
+                  primary="Especialista" 
+                  secondary={citaSeleccionada.especialista?.nombreCompleto || citaSeleccionada.especialista?.nombre || 'No asignado'} 
+                  primaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                  secondaryTypographyProps={{ variant: 'body1', color: colors.text, fontWeight: '500' }}
+                />
+              </ListItem>
+            </List>
+          </Box>
+        )}
       </Popover>
 
     </Box>

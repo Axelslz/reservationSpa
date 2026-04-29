@@ -148,9 +148,9 @@ const Login = () => {
             Iniciar Sesión
           </Button>
 
-          <Typography variant="body2" sx={{ color: '#888', mt: 2, cursor: 'pointer', '&:hover': { color: '#C5A059' } }}>
+          {/* <Typography variant="body2" sx={{ color: '#888', mt: 2, cursor: 'pointer', '&:hover': { color: '#C5A059' } }}>
             ¿Olvidaste tu contraseña?
-          </Typography>
+          </Typography> */}
         </form>
       </Paper>
     </Box>

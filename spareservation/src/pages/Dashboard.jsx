@@ -2,15 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, TextField, Button, InputAdornment, 
   Avatar, Paper, IconButton, Chip, Popover, List, ListItem, 
-  ListItemButton, ListItemText, ListItemIcon, useMediaQuery, useTheme 
+  ListItemButton, ListItemText, ListItemIcon, useMediaQuery, useTheme,
+  Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogContentText, 
+  DialogActions, FormControl, InputLabel, Select
 } from '@mui/material';
 import { 
   Search, AddCircle, History, MoreVert, CalendarToday, 
-  Logout, EventAvailable, Menu as MenuIcon 
+  Logout, EventAvailable, Menu as MenuIcon, Edit, Delete 
 } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import { getTodosLosClientes } from '../services/clientService';
+import { getTodosLosClientes, actualizarCliente, eliminarCliente } from '../services/clientService';
 import RegistroCliente from '../components/RegistroCliente';
 import AgendarCita from '../components/AgendarCita';
 import HistorialCliente from '../components/HistorialCliente';
@@ -30,11 +32,19 @@ const Dashboard = () => {
   const [openCalendario, setOpenCalendario] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState(null);
 
+  // ESTADOS PARA ACCIONES (EDITAR/ELIMINAR)
+  const [anchorElMenu, setAnchorElMenu] = useState(null);
+  const [clienteMenu, setClienteMenu] = useState(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [editForm, setEditForm] = useState({ nombreCompleto: '', telefono: '', email: '', status: '' });
+
   const colors = {
     olive: '#5B6346',
     gold: '#C5A059',
     cream: '#FDF7E7',
-    inputBg: '#E1D9C1'
+    inputBg: '#E1D9C1',
+    red: '#EF4444'
   };
 
   const fetchDatos = useCallback(async () => {
@@ -54,38 +64,69 @@ const Dashboard = () => {
   const handleOpenPopover = (event) => setAnchorEl(event.currentTarget);
   const handleClosePopover = () => setAnchorEl(null);
 
+  // --- MANEJADORES DEL MENÚ DE 3 PUNTOS ---
+  const handleOpenMenu = (event, cliente) => {
+    setAnchorElMenu(event.currentTarget);
+    setClienteMenu(cliente);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorElMenu(null);
+  };
+
+  const handleAbrirEditar = () => {
+    setEditForm({
+      nombreCompleto: clienteMenu.nombreCompleto,
+      telefono: clienteMenu.telefono,
+      email: clienteMenu.email,
+      status: clienteMenu.status || 'Nuevo'
+    });
+    setOpenEditDialog(true);
+    handleCloseMenu();
+  };
+
+  const handleAbrirEliminar = () => {
+    setOpenDeleteDialog(true);
+    handleCloseMenu();
+  };
+
+  const handleGuardarEdicion = async () => {
+    try {
+      await actualizarCliente(clienteMenu.id, editForm);
+      setOpenEditDialog(false);
+      fetchDatos(); // Refrescar tabla
+    } catch (error) {
+      console.error("Error al editar:", error);
+      alert("Hubo un error al editar el cliente.");
+    }
+  };
+
+  const handleConfirmarEliminar = async () => {
+    try {
+      await eliminarCliente(clienteMenu.id);
+      setOpenDeleteDialog(false);
+      fetchDatos(); // Refrescar tabla
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Hubo un error al eliminar el cliente.");
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: colors.cream, position: 'relative' }}>
       
-        <Box sx={{ width: { md: 260 }, flexShrink: 0 }}>
-      <Sidebar 
-        mobileOpen={mobileOpen} 
-        onDrawerToggle={handleDrawerToggle} 
-        onCalendarClick={() => setOpenCalendario(true)} 
-      />
-    </Box>
+      <Box sx={{ width: { md: 260 }, flexShrink: 0 }}>
+        <Sidebar 
+          mobileOpen={mobileOpen} 
+          onDrawerToggle={handleDrawerToggle} 
+          onCalendarClick={() => setOpenCalendario(true)} 
+        />
+      </Box>
 
-    {/* CONTENIDO PRINCIPAL - ESTO HARÁ QUE SE VEA BIEN */}
-    <Box component="main" sx={{ 
-      flexGrow: 1, 
-      height: '100vh',
-      display: 'flex', 
-      flexDirection: 'column',
-      minWidth: 0, // CRÍTICO: Evita que el contenido desborde al flexbox
-      overflowX: 'hidden'
-    }}>
+      <Box component="main" sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
         
         {/* HEADER */}
-      <Box sx={{ 
-        height: 90, 
-        bgcolor: colors.olive, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        px: { xs: 2, md: 4 },
-        flexShrink: 0,
-        zIndex: 10
-      }}>
+        <Box sx={{ height: 90, bgcolor: colors.olive, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 2, md: 4 }, flexShrink: 0, zIndex: 10 }}>
           <Box>
             {isMobile && (
               <IconButton onClick={handleDrawerToggle} sx={{ color: colors.gold }}>
@@ -151,7 +192,7 @@ const Dashboard = () => {
             </Box>
           </Box>
 
-          {/* LISTA CON SCROLL MEJORADO */}
+          {/* LISTA DE CLIENTES */}
           <Box sx={{ 
             flexGrow: 1, 
             overflowY: 'auto', 
@@ -159,9 +200,9 @@ const Dashboard = () => {
             '&::-webkit-scrollbar': { width: '6px' },
             '&::-webkit-scrollbar-thumb': { background: colors.gold, borderRadius: '10px' },
           }}>
-            {clientes.map((cliente, index) => (
+            {clientes.map((cliente) => (
                 <Paper 
-                  key={cliente._id || `cliente-${index}`} 
+                  key={cliente.id} 
                   elevation={0} 
                   sx={{ 
                     p: 1.5, mb: 1, borderRadius: '12px', display: 'flex', alignItems: 'center', 
@@ -175,12 +216,22 @@ const Dashboard = () => {
                 </Box>
                 <Typography variant="body2" sx={{ flex: 1, textAlign: 'center', color: '#666' }}>{cliente.codigoUnico}</Typography>
                 <Box sx={{ flex: 1, textAlign: 'center' }}>
-                   <Chip label="Activo" size="small" variant="outlined" sx={{ borderColor: colors.gold, color: colors.gold, height: '20px', fontSize: '0.7rem' }} />
+                   {/* ESTADO DINÁMICO */}
+                   <Chip 
+                     label={cliente.status || 'Nuevo'} 
+                     size="small" 
+                     variant="outlined" 
+                     sx={{ 
+                       borderColor: cliente.status === 'Inactivo' ? colors.red : colors.gold, 
+                       color: cliente.status === 'Inactivo' ? colors.red : colors.gold, 
+                       height: '20px', fontSize: '0.7rem' 
+                     }} 
+                   />
                 </Box>
                 <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                   <IconButton onClick={() => { setSelectedCliente(cliente); setOpenAgendar(true); }} sx={{ color: colors.gold }}><EventAvailable fontSize="small"/></IconButton>
                   <IconButton onClick={() => { setSelectedCliente(cliente); setOpenHistorial(true); }} sx={{ color: colors.gold }}><History fontSize="small"/></IconButton>
-                  <IconButton size="small"><MoreVert fontSize="small"/></IconButton>
+                  <IconButton onClick={(e) => handleOpenMenu(e, cliente)} size="small" sx={{ color: '#666' }}><MoreVert fontSize="small"/></IconButton>
                 </Box>
               </Paper>
             ))}
@@ -188,7 +239,83 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      {/* DIÁLOGOS Y MODALES */}
+      {/* MENÚ DESPLEGABLE DE 3 PUNTOS */}
+      <Menu
+        anchorEl={anchorElMenu}
+        open={Boolean(anchorElMenu)}
+        onClose={handleCloseMenu}
+        PaperProps={{ sx: { borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}
+      >
+        <MenuItem onClick={handleAbrirEditar} sx={{ color: colors.olive, gap: 1 }}>
+          <Edit fontSize="small" /> Editar Información
+        </MenuItem>
+        <MenuItem onClick={handleAbrirEliminar} sx={{ color: colors.red, gap: 1 }}>
+          <Delete fontSize="small" /> Eliminar Cliente
+        </MenuItem>
+      </Menu>
+
+      {/* DIÁLOGO DE EDICIÓN */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: colors.olive, fontWeight: 'bold', fontFamily: 'serif' }}>Editar Cliente</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField 
+              label="Nombre Completo" 
+              fullWidth 
+              value={editForm.nombreCompleto}
+              onChange={(e) => setEditForm({ ...editForm, nombreCompleto: e.target.value })}
+            />
+            <TextField 
+              label="Teléfono" 
+              fullWidth 
+              value={editForm.telefono}
+              onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
+            />
+            <TextField 
+              label="Correo Electrónico" 
+              fullWidth 
+              value={editForm.email}
+              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+            />
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={editForm.status}
+                label="Estado"
+                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+              >
+                <MenuItem value="Nuevo">Nuevo</MenuItem>
+                <MenuItem value="Activo">Activo</MenuItem>
+                <MenuItem value="Inactivo">Inactivo</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpenEditDialog(false)} sx={{ color: '#666' }}>Cancelar</Button>
+          <Button onClick={handleGuardarEdicion} variant="contained" sx={{ bgcolor: colors.gold, '&:hover': { bgcolor: '#A3844A' } }}>
+            Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle sx={{ color: colors.red, fontWeight: 'bold' }}>¿Eliminar Cliente?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas eliminar a <strong>{clienteMenu?.nombreCompleto}</strong>? Esta acción no se puede deshacer.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpenDeleteDialog(false)} sx={{ color: '#666' }}>Cancelar</Button>
+          <Button onClick={handleConfirmarEliminar} variant="contained" color="error">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* OTROS DIÁLOGOS EXISTENTES */}
       <RegistroCliente open={openRegistro} onClose={() => setOpenRegistro(false)} onSuccess={fetchDatos} />
       <CalendarioCompleto open={openCalendario} onClose={() => setOpenCalendario(false)} />
       {selectedCliente && (
@@ -198,7 +325,7 @@ const Dashboard = () => {
         </>
       )}
 
-      {/* POPOVER PERFIL */}
+      {/* POPOVER CERRAR SESIÓN */}
       <Popover 
         open={Boolean(anchorEl)} 
         anchorEl={anchorEl} 
