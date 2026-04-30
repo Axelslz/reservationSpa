@@ -38,21 +38,26 @@ const Login = () => {
   return (
     <Box 
       sx={{ 
-        minHeight: '100vh', 
+        height: '100vh', // Cambiado a 'height' en lugar de 'minHeight'
+        width: '100%',
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
         background: 'linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url("https://res.cloudinary.com/dqozuofy6/image/upload/v1776882079/fondo_login_k3m60w.jpg")',
+        backgroundSize: 'cover', // Asegura que el fondo cubra bien
+        backgroundPosition: 'center',
         bgcolor: '#FDF7E7', 
-        p: 2 
+        p: 2,
+        boxSizing: 'border-box', // Evita que el padding sume al 100vh creando scroll
+        overflow: 'hidden' // Corta cualquier pequeño desbordamiento extra
       }}
     >
       <Paper 
         elevation={0} 
         sx={{ 
-          p: { xs: 4, md: 6 }, 
+          p: { xs: 3, md: 5 }, // Ligeramente reducido para evitar scroll vertical
           width: '100%', 
-          maxWidth: 600, 
+          maxWidth: 550, // Un poco más compacto para que luzca mejor
           borderRadius: '20px', 
           textAlign: 'center',
           border: '1px solid #EAD8B1',
@@ -60,21 +65,24 @@ const Login = () => {
           backdropFilter: 'blur(10px)'
         }}
       >
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 3 }}>
+          {/* AQUÍ CAMBIAMOS EL LOGO A CÍRCULO */}
           <Box 
             component="img" 
-            src="/logo-nexo.png" 
-            sx={{ width: 80, mb: 1 }}
+            src="https://res.cloudinary.com/dqozuofy6/image/upload/v1777585907/Logo_nexo_miwd47.jpg" 
+            sx={{ 
+              width: 130, 
+              height: 130, // Alto igual al ancho
+              borderRadius: '50%', // Lo hace un círculo
+              objectFit: 'cover', // Asegura que llene el círculo sin distorsionarse
+              mb: 1, 
+              boxShadow: '0px 4px 10px rgba(0,0,0,0.1)' // (Opcional) Una pequeña sombra para que resalte
+            }}
             alt="Logo Nexo"
             onError={(e) => e.target.style.display = 'none'}
           />
-          <Typography variant="h4" sx={{ color: '#C5A059', fontWeight: '500', letterSpacing: 2, mb: 0.5, fontFamily: 'serif' }}>
-            NEXO
-          </Typography>
-          <Typography variant="overline" sx={{ color: '#D4AF37', letterSpacing: 4 }}>
-            LUXURY SPA
-          </Typography>
-          <Typography variant="h5" sx={{ mt: 3, fontWeight: '400', color: '#333' }}>
+         
+          <Typography variant="h5" sx={{ mt: 2, fontWeight: '400', color: '#333' }}>
             Bienvenido de vuelta
           </Typography>
           <Typography variant="body2" sx={{ color: '#666' }}>
@@ -82,7 +90,7 @@ const Login = () => {
           </Typography>
         </Box>
 
-        {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>{error}</Alert>}
         
         <form onSubmit={handleSubmit}>
           <Typography variant="body2" sx={{ textAlign: 'left', mb: 1, ml: 1, fontWeight: 'bold', color: '#444' }}>Usuario</Typography>
@@ -134,8 +142,8 @@ const Login = () => {
             fullWidth
             variant="contained"
             sx={{ 
-              mt: 5, 
-              mb: 2, 
+              mt: 4, // Reducido de 5 a 4 para ganar espacio vertical
+              mb: 1, 
               py: 1.5,
               borderRadius: '12px',
               bgcolor: '#4B5335', 
@@ -147,10 +155,6 @@ const Login = () => {
           >
             Iniciar Sesión
           </Button>
-
-          {/* <Typography variant="body2" sx={{ color: '#888', mt: 2, cursor: 'pointer', '&:hover': { color: '#C5A059' } }}>
-            ¿Olvidaste tu contraseña?
-          </Typography> */}
         </form>
       </Paper>
     </Box>

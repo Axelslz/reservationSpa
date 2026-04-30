@@ -7,8 +7,6 @@ import {
   Logout, Settings, Person, NotificationsNone, 
   KeyboardArrowDown, Menu as MenuIcon 
 } from '@mui/icons-material';
-import LogoFlor from '../assets/Nexo_flor.png'; 
-import LogoLetras from '../assets/Nexo_letras.png';
 
 const Navbar = ({ userName, onLogout, role, onMenuClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -28,17 +26,17 @@ const Navbar = ({ userName, onLogout, role, onMenuClick }) => {
 
   return (
     <AppBar 
-      position="fixed" 
+      position="sticky" // <-- Cambiado a sticky para que conviva con el Sidebar
       sx={{ 
+        top: 0,
         bgcolor: colors.olive, 
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: (theme) => theme.zIndex.drawer + 1
+        zIndex: 10
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 4 }, height: 70 }}>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* Botón Hamburguesa: Solo en móvil */}
           <IconButton
             color="inherit"
             onClick={onMenuClick}
@@ -47,8 +45,12 @@ const Navbar = ({ userName, onLogout, role, onMenuClick }) => {
             <MenuIcon />
           </IconButton>
 
-          <Box component="img" src={LogoFlor} sx={{ height: 40 }} />
-          <Box component="img" src={LogoLetras} sx={{ height: 35, display: { xs: 'none', sm: 'block' }, filter: 'brightness(0) invert(1)' }} />
+          <Box 
+            component="img" 
+            src="https://res.cloudinary.com/dqozuofy6/image/upload/v1777585556/Logo_nexo_e9kvat.png" 
+            sx={{ height: 50, objectFit: 'contain' }} 
+            alt="Nexo Spa Logo"
+          />
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>

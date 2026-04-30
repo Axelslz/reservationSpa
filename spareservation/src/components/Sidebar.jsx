@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Drawer, IconButton, Typography, Divider
+  Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Drawer, IconButton, Divider
 } from '@mui/material';
 import { Contacts, CalendarMonth, AccessTime, Close } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -29,15 +29,15 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
   const drawerContent = (
     <Box sx={{ bgcolor: colors.sidebar, height: '100%', display: 'flex', flexDirection: 'column', color: 'white' }}>
       
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', p: 3, minHeight: '90px' }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: colors.gold, letterSpacing: 2, fontFamily: 'serif' }}>
-            NEXO
-          </Typography>
-          <Typography variant="caption" sx={{ color: colors.gold, letterSpacing: 3, display: 'block', mt: -0.5 }}>
-            LUXURY SPA
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', p: 3, minHeight: '100px' }}>
+        
+        {/* AQUÍ COLOCAMOS EL LOGO DE CLOUDINARY */}
+        <Box 
+          component="img" 
+          src="https://res.cloudinary.com/dqozuofy6/image/upload/v1777585556/Logo_nexo_e9kvat.png" 
+          sx={{ width: 130, objectFit: 'contain' }} 
+          alt="Logo Nexo Spa"
+        />
         
         <IconButton 
           onClick={onDrawerToggle} 

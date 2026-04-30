@@ -11,7 +11,6 @@ export const getAgendaHoy = async (fecha) => {
 
 export const getTodasLasCitas = async () => {
   try {
-    // CAMBIO AQUÍ: Agregamos '/dashboard' a la ruta
     const response = await api.get('/citas/dashboard'); 
     return response.data;
   } catch (error) {
@@ -28,3 +27,29 @@ export const cambiarEstadoCita = async (citaId, nuevoEstado) => {
   }
 };
 
+export const actualizarDetallesCita = async (citaId, citaData) => {
+  try {
+    const response = await api.put(`/citas/${citaId}`, citaData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al actualizar la cita' };
+  }
+};
+
+export const getServicios = async () => {
+  try {
+    const response = await api.get('/servicios');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al cargar los servicios' };
+  }
+};
+
+export const getEspecialistas = async () => {
+  try {
+    const response = await api.get('/auth/especialistas');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al cargar los especialistas' };
+  }
+};

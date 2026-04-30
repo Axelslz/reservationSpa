@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, TextField, Button, InputAdornment, 
-  Avatar, Paper, IconButton, Chip, Popover, List, ListItem, 
-  ListItemButton, ListItemText, ListItemIcon, useMediaQuery, useTheme,
-  Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogContentText, 
-  DialogActions, FormControl, InputLabel, Select
+  Avatar, Paper, IconButton, Chip, Menu, MenuItem, 
+  Dialog, DialogTitle, DialogContent, DialogContentText, 
+  DialogActions, FormControl, InputLabel, Select, useMediaQuery, useTheme
 } from '@mui/material';
 import { 
-  Search, AddCircle, History, MoreVert, CalendarToday, 
-  Logout, EventAvailable, Menu as MenuIcon, Edit, Delete 
+  Search, AddCircle, History, MoreVert, EventAvailable, Edit, Delete, Menu as MenuIcon 
 } from '@mui/icons-material';
+
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { getTodosLosClientes, actualizarCliente, eliminarCliente } from '../services/clientService';
@@ -21,23 +20,20 @@ import CalendarioCompleto from '../components/CalendarioCompleto';
 const Dashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { logout, user } = useAuth();
-
+  const { logout, user } = useAuth(); 
   const [clientes, setClientes] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false); 
   const [openRegistro, setOpenRegistro] = useState(false);
   const [openAgendar, setOpenAgendar] = useState(false);
   const [openHistorial, setOpenHistorial] = useState(false);
   const [openCalendario, setOpenCalendario] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState(null);
-
-  // ESTADOS PARA ACCIONES (EDITAR/ELIMINAR)
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [clienteMenu, setClienteMenu] = useState(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editForm, setEditForm] = useState({ nombreCompleto: '', telefono: '', email: '', status: '' });
+  const [anchorElUser, setAnchorElUser] = useState(null);
 
   const colors = {
     olive: '#5B6346',
@@ -61,10 +57,7 @@ const Dashboard = () => {
   }, [fetchDatos]);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-  const handleOpenPopover = (event) => setAnchorEl(event.currentTarget);
-  const handleClosePopover = () => setAnchorEl(null);
 
-  // --- MANEJADORES DEL MENÚ DE 3 PUNTOS ---
   const handleOpenMenu = (event, cliente) => {
     setAnchorElMenu(event.currentTarget);
     setClienteMenu(cliente);
@@ -94,7 +87,7 @@ const Dashboard = () => {
     try {
       await actualizarCliente(clienteMenu.id, editForm);
       setOpenEditDialog(false);
-      fetchDatos(); // Refrescar tabla
+      fetchDatos(); 
     } catch (error) {
       console.error("Error al editar:", error);
       alert("Hubo un error al editar el cliente.");
@@ -105,12 +98,15 @@ const Dashboard = () => {
     try {
       await eliminarCliente(clienteMenu.id);
       setOpenDeleteDialog(false);
-      fetchDatos(); // Refrescar tabla
+      fetchDatos(); 
     } catch (error) {
       console.error("Error al eliminar:", error);
       alert("Hubo un error al eliminar el cliente.");
     }
   };
+
+  const fechaActual = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  const fechaFormateada = fechaActual.charAt(0).toUpperCase() + fechaActual.slice(1);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: colors.cream, position: 'relative' }}>
@@ -125,38 +121,57 @@ const Dashboard = () => {
 
       <Box component="main" sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
         
-        {/* HEADER */}
-        <Box sx={{ height: 90, bgcolor: colors.olive, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 2, md: 4 }, flexShrink: 0, zIndex: 10 }}>
-          <Box>
-            {isMobile && (
-              <IconButton onClick={handleDrawerToggle} sx={{ color: colors.gold }}>
-                <MenuIcon />
-              </IconButton>
-            )}
-          </Box>
+        {/* --- NUEVO ENCABEZADO MINIMALISTA (Reemplaza al antiguo Navbar) --- */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, md: '20px 60px 0 60px' } }}>
+          
+          {/* Botón de menú para móviles */}
+          <IconButton
+            color="inherit"
+            onClick={handleDrawerToggle}
+            sx={{ display: { md: 'none' }, color: colors.olive }}
+          >
+            <MenuIcon />
+          </IconButton>
 
-          <Box onClick={handleOpenPopover} sx={{ display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer' }}>
-            <Box sx={{ textAlign: 'right' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                <Avatar sx={{ bgcolor: colors.gold, width: 32, height: 32, fontSize: '0.9rem' }}>
-                  {user?.nombreCompleto?.[0] || 'U'}
-                </Avatar>
-                <Typography variant="body2" sx={{ color: colors.gold, fontWeight: 'bold', display: { xs: 'none', sm: 'block' } }}>
-                  {user?.nombreCompleto || 'USUARIO'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>
-                  Miércoles 15 De Abril
-                </Typography>
-                <CalendarToday sx={{ fontSize: 12, color: colors.gold }} />
-              </Box>
+          <Box sx={{ flexGrow: 1 }} /> {/* Espaciador */}
+
+          {/* Sección de Perfil de Usuario */}
+          <Box 
+            onClick={(e) => setAnchorElUser(e.currentTarget)}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
+          >
+            <Avatar sx={{ bgcolor: colors.gold, color: '#fff', width: 40, height: 40 }}>
+              {user?.nombre?.[0]?.toUpperCase() || 'A'}
+            </Avatar>
+            <Box>
+              <Typography sx={{ color: '#af7140', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.2 }}>
+                {user?.nombre || 'Administrador General'}
+              </Typography>
+              <Typography sx={{ color: '#888', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
+                {fechaFormateada} <EventAvailable sx={{ fontSize: '0.9rem' }}/>
+              </Typography>
             </Box>
           </Box>
+
+          <Menu
+            anchorEl={anchorElUser}
+            open={Boolean(anchorElUser)}
+            onClose={() => setAnchorElUser(null)}
+            PaperProps={{ sx: { borderRadius: 2, minWidth: '150px', mt: 1, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}
+          >
+            <MenuItem 
+              onClick={() => { 
+                setAnchorElUser(null); 
+                logout(); 
+              }} 
+              sx={{ color: colors.red, justifyContent: 'center', fontWeight: 'bold' }}
+            >
+              Cerrar Sesión
+            </MenuItem>
+          </Menu>
         </Box>
 
-        {/* ÁREA DE DIRECTORIO */}
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: '40px 60px' }, overflow: 'hidden' }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, md: '20px 60px 40px 60px' }, overflow: 'hidden' }}>
           <Box sx={{ flexShrink: 0 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
               <Box>
@@ -192,7 +207,6 @@ const Dashboard = () => {
             </Box>
           </Box>
 
-          {/* LISTA DE CLIENTES */}
           <Box sx={{ 
             flexGrow: 1, 
             overflowY: 'auto', 
@@ -216,7 +230,6 @@ const Dashboard = () => {
                 </Box>
                 <Typography variant="body2" sx={{ flex: 1, textAlign: 'center', color: '#666' }}>{cliente.codigoUnico}</Typography>
                 <Box sx={{ flex: 1, textAlign: 'center' }}>
-                   {/* ESTADO DINÁMICO */}
                    <Chip 
                      label={cliente.status || 'Nuevo'} 
                      size="small" 
@@ -324,24 +337,6 @@ const Dashboard = () => {
           <HistorialCliente open={openHistorial} onClose={() => setOpenHistorial(false)} cliente={selectedCliente} />
         </>
       )}
-
-      {/* POPOVER CERRAR SESIÓN */}
-      <Popover 
-        open={Boolean(anchorEl)} 
-        anchorEl={anchorEl} 
-        onClose={handleClosePopover} 
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <List sx={{ p: 0, width: 160 }}>
-          <ListItem disablePadding>
-            <ListItemButton onClick={logout}>
-              <ListItemIcon sx={{ minWidth: 35 }}><Logout fontSize="small" /></ListItemIcon>
-              <ListItemText primary="Cerrar Sesión" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Popover>
     </Box>
   );
 };
