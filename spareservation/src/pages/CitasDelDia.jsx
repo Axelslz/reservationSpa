@@ -24,7 +24,7 @@ const colors = {
   green: '#22C55E',
   red: '#EF4444',
   orange: '#F59E0B',
-  gray: '#6B7280'
+  gray: '#6B7280' 
 };
 
 const getStatusColor = (status) => {
@@ -150,7 +150,6 @@ const CitasDelDia = () => {
     }
   };
 
-  // --- CALENDARIO ---
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -195,10 +194,8 @@ const CitasDelDia = () => {
         </Box>
       )}
 
-      {/* CONTENEDOR PRINCIPAL: Ahora en fila para escritorio, para que el sidebar llegue hasta arriba */}
       <Box component="main" sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minWidth: 0, overflowX: 'hidden' }}>
         
-        {/* ENCABEZADO MÓVIL (Solo visible en pantallas de celular) */}
         <Box sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: colors.olive, zIndex: 10 }}>
           <IconButton color="inherit" onClick={handleDrawerToggle} sx={{ color: 'white' }}>
             <MenuIcon />
@@ -219,7 +216,6 @@ const CitasDelDia = () => {
           </Box>
         </Box>
 
-        {/* CONTENIDO IZQUIERDO: Tabla principal */}
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', p: { xs: 2, md: '50px 60px' } }}>
           <Typography variant="h4" sx={{ color: colors.text, fontWeight: 500, fontFamily: 'serif', mb: 4, letterSpacing: 1 }}>
             {isAdmin ? 'Citas del Día' : `Tus Citas: ${fechaFormateada.split('-').reverse().join('-')}`}
@@ -288,10 +284,7 @@ const CitasDelDia = () => {
           </TableContainer>
         </Box>
 
-        {/* SIDEBAR DERECHO (Ahora abarca todo el alto vertical de la pantalla) */}
         <Box sx={{ width: { xs: '100%', md: '380px' }, bgcolor: colors.olive, display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', borderLeft: { md: `1px solid rgba(255,255,255,0.1)` } }}>
-          
-          {/* ENCABEZADO DE PERFIL ESCRITORIO (Se movió aquí adentro para que el verde lo cubra) */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end', alignItems: 'center', p: '30px 40px 10px 40px' }}>
             <Box onClick={(e) => setAnchorElUser(e.currentTarget)} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}>
               <Box sx={{ textAlign: 'right' }}>
@@ -308,7 +301,6 @@ const CitasDelDia = () => {
             </Box>
           </Box>
 
-          {/* Calendario y Resumen */}
           <Box sx={{ p: { xs: 4, md: '20px 40px 40px 40px' }, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
             <Box sx={{ border: `1px solid ${colors.gold}`, borderRadius: 3, p: 2, mb: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, color: 'white' }}>
@@ -337,14 +329,14 @@ const CitasDelDia = () => {
               ))}
             </Box>
 
-            {isAdmin && (
+            {/* {isAdmin && (
               <Button 
                 variant="contained" 
                 sx={{ bgcolor: colors.gold, color: 'white', mt: 4, alignSelf: 'center', borderRadius: '20px', textTransform: 'none', px: 4, py: 1, '&:hover': { bgcolor: '#B08D4C' } }}
               >
                 Agregar Cita
               </Button>
-            )}
+            )} */}
           </Box>
         </Box>
       </Box>

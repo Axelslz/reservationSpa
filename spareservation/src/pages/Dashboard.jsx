@@ -120,11 +120,8 @@ const Dashboard = () => {
       </Box>
 
       <Box component="main" sx={{ flexGrow: 1, height: '100vh', display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
-        
-        {/* --- NUEVO ENCABEZADO MINIMALISTA (Reemplaza al antiguo Navbar) --- */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, md: '20px 60px 0 60px' } }}>
-          
-          {/* Botón de menú para móviles */}
+  
           <IconButton
             color="inherit"
             onClick={handleDrawerToggle}
@@ -133,9 +130,8 @@ const Dashboard = () => {
             <MenuIcon />
           </IconButton>
 
-          <Box sx={{ flexGrow: 1 }} /> {/* Espaciador */}
+          <Box sx={{ flexGrow: 1 }} /> 
 
-          {/* Sección de Perfil de Usuario */}
           <Box 
             onClick={(e) => setAnchorElUser(e.currentTarget)}
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
@@ -252,7 +248,6 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      {/* MENÚ DESPLEGABLE DE 3 PUNTOS */}
       <Menu
         anchorEl={anchorElMenu}
         open={Boolean(anchorElMenu)}
@@ -267,7 +262,6 @@ const Dashboard = () => {
         </MenuItem>
       </Menu>
 
-      {/* DIÁLOGO DE EDICIÓN */}
       <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ color: colors.olive, fontWeight: 'bold', fontFamily: 'serif' }}>Editar Cliente</DialogTitle>
         <DialogContent>
@@ -312,7 +306,6 @@ const Dashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {/* DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
         <DialogTitle sx={{ color: colors.red, fontWeight: 'bold' }}>¿Eliminar Cliente?</DialogTitle>
         <DialogContent>
@@ -328,7 +321,6 @@ const Dashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {/* OTROS DIÁLOGOS EXISTENTES */}
       <RegistroCliente open={openRegistro} onClose={() => setOpenRegistro(false)} onSuccess={fetchDatos} />
       <CalendarioCompleto open={openCalendario} onClose={() => setOpenCalendario(false)} />
       {selectedCliente && (

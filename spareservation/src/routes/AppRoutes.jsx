@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard'; 
+import Estadisticas from '../pages/Estadisticas'; // <-- IMPORTAMOS EL NUEVO COMPONENTE
 import ProtectedRoute from './ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
 import CitasDelDia from '../pages/CitasDelDia';
@@ -17,8 +18,14 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={user ? <Navigate to={getHomeRoute()} /> : <Login />} />
-        <Route path="/reservaciones" element={<ProtectedRoute><Dashboard /></ProtectedRoute> } />
+        
+        {/* Rutas Protegidas */}
+        <Route path="/reservaciones" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/citas-dia" element={<ProtectedRoute><CitasDelDia /></ProtectedRoute>} />
+        
+        {/* NUEVA RUTA PARA ESTADISTICAS */}
+        <Route path="/estadisticas" element={<ProtectedRoute><Estadisticas /></ProtectedRoute>} />
+        
         <Route path="*" element={<Navigate to={user ? getHomeRoute() : "/login"} />} />
       </Routes>
     </BrowserRouter>

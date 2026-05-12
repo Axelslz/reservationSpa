@@ -163,7 +163,7 @@ const CalendarioCompleto = ({ open, onClose }) => {
                 />
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                 <Button 
                   variant="contained" 
                   sx={{ 
@@ -178,7 +178,7 @@ const CalendarioCompleto = ({ open, onClose }) => {
                 >
                   AGENDAR CITA
                 </Button>
-              </Box>
+              </Box> */}
             </>
           ) : (
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

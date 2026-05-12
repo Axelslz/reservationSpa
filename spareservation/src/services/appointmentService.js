@@ -53,3 +53,12 @@ export const getEspecialistas = async () => {
     throw error.response?.data || { message: 'Error al cargar los especialistas' };
   }
 };
+
+export const getEstadisticasFinancieras = async () => {
+  try {
+    const response = await api.get('/citas/estadisticas');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error al cargar las estadísticas financieras' };
+  }
+};

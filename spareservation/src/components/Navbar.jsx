@@ -26,7 +26,7 @@ const Navbar = ({ userName, onLogout, role, onMenuClick }) => {
 
   return (
     <AppBar 
-      position="sticky" // <-- Cambiado a sticky para que conviva con el Sidebar
+      position="sticky" 
       sx={{ 
         top: 0,
         bgcolor: colors.olive, 

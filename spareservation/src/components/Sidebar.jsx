@@ -2,14 +2,15 @@ import React from 'react';
 import { 
   Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Drawer, IconButton, Divider
 } from '@mui/material';
-import { Contacts, CalendarMonth, AccessTime, Close } from '@mui/icons-material';
+// IMPORTAMOS EL ÍCONO PARA EL DASHBOARD FINANCIERO (Dashboard o InsertChart)
+import { Contacts, CalendarMonth, AccessTime, Close, Dashboard as DashboardIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuth(); // Obtenemos el usuario para verificar su rol
   const drawerWidth = 260;
 
   const colors = {
@@ -18,11 +19,24 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
     activeBg: '#D1D5C2' 
   };
 
-  const menuItems = [
+ const menuItems = [];
+
+  // Agrega este console.log temporal para ver tus datos reales en la consola (F12)
+  console.log("Datos del usuario en Sidebar:", user); 
+
+  // Hacemos la validación más flexible (buscando 'rol' o 'role', y validando mayúsculas)
+  const isAdmin = user?.rol?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'admin';
+
+  if (isAdmin) {
+    menuItems.push({ text: 'Dashboard', icon: <DashboardIcon />, path: '/estadisticas' });
+  }
+
+  // ESTOS ITEMS LOS VEN TODOS
+  menuItems.push(
     { text: 'Directorio', icon: <Contacts />, path: '/reservaciones' },
     { text: 'Calendario', icon: <CalendarMonth />, action: 'calendar' },
-    { text: 'Cita del día', icon: <AccessTime />, path: '/citas-dia' },
-  ];
+    { text: 'Cita del día', icon: <AccessTime />, path: '/citas-dia' }
+  );
 
   const visibleItems = menuItems; 
 
@@ -30,8 +44,7 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
     <Box sx={{ bgcolor: colors.sidebar, height: '100%', display: 'flex', flexDirection: 'column', color: 'white' }}>
       
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', p: 3, minHeight: '100px' }}>
-        
-        {/* AQUÍ COLOCAMOS EL LOGO DE CLOUDINARY */}
+      
         <Box 
           component="img" 
           src="https://res.cloudinary.com/dqozuofy6/image/upload/v1777585556/Logo_nexo_e9kvat.png" 
@@ -49,7 +62,6 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
 
       <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)', mb: 2 }} />
 
-      {/* LISTA DE BOTONES */}
       <List sx={{ px: 1 }}>
         {visibleItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -90,7 +102,7 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
 
   return (
     <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
-      {/* VERSIÓN MÓVIL */}
+
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -104,7 +116,6 @@ const Sidebar = ({ onCalendarClick, mobileOpen, onDrawerToggle }) => {
         {drawerContent}
       </Drawer>
 
-      {/* VERSIÓN ESCRITORIO (FIJO) */}
       <Drawer
         variant="permanent"
         sx={{ 

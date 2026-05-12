@@ -9,8 +9,7 @@ import api from '../services/api';
 const HistorialCliente = ({ open, onClose, cliente }) => {
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Paleta de colores unificada con el resto del sistema
+  
   const colors = {
     olive: '#5B6346',
     gold: '#C5A059',
@@ -49,12 +48,12 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
       PaperProps={{
         sx: { 
           borderRadius: 4,
-          bgcolor: colors.cream, // Fondo crema general
+          bgcolor: colors.cream, 
           overflow: 'hidden'
         }
       }}
     >
-      {/* HEADER DE LA MODAL */}
+
       <DialogTitle sx={{ 
         m: 0, p: 3, 
         bgcolor: colors.olive, 
@@ -62,7 +61,7 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        borderBottom: `4px solid ${colors.gold}` // Detalle dorado
+        borderBottom: `4px solid ${colors.gold}` 
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <History sx={{ color: colors.gold }} />
@@ -76,7 +75,7 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
       </DialogTitle>
 
       <DialogContent sx={{ p: { xs: 2, sm: 4 } }}>
-        {/* INFO DEL CLIENTE */}
+
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2.5, mt: 2 }}>
           <Avatar sx={{ 
             bgcolor: colors.gold, 
@@ -100,7 +99,6 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
 
         <Divider sx={{ mb: 4, borderColor: colors.inputBg }} />
 
-        {/* LISTADO DE HISTORIAL */}
         {loading ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
             <CircularProgress sx={{ color: colors.gold }} />
@@ -115,7 +113,7 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
                 sx={{ 
                   p: 2.5, 
                   borderRadius: 3, 
-                  bgcolor: '#ffffff', // Tarjetas blancas para contrastar con el fondo crema
+                  bgcolor: '#ffffff', 
                   border: `1px solid ${colors.inputBg}`,
                   transition: 'all 0.2s ease-in-out',
                   '&:hover': { 
@@ -125,7 +123,7 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
                   }
                 }}
               >
-                {/* Cabecera de la tarjeta (Fecha y Costo) */}
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CalendarMonth sx={{ color: colors.olive, fontSize: 20 }} />
@@ -148,7 +146,6 @@ const HistorialCliente = ({ open, onClose, cliente }) => {
                 
                 <Divider sx={{ mb: 2, opacity: 0.5 }} />
                 
-                {/* Cuerpo de la tarjeta (Servicio y Observaciones) */}
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                   <Box sx={{ bgcolor: `${colors.cream}`, p: 1, borderRadius: '50%', display: 'flex' }}>
                     <Spa sx={{ color: colors.gold, fontSize: 22 }} />

@@ -38,26 +38,26 @@ const Login = () => {
   return (
     <Box 
       sx={{ 
-        height: '100vh', // Cambiado a 'height' en lugar de 'minHeight'
+        height: '100vh', 
         width: '100%',
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
         background: 'linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url("https://res.cloudinary.com/dqozuofy6/image/upload/v1776882079/fondo_login_k3m60w.jpg")',
-        backgroundSize: 'cover', // Asegura que el fondo cubra bien
+        backgroundSize: 'cover', 
         backgroundPosition: 'center',
         bgcolor: '#FDF7E7', 
         p: 2,
-        boxSizing: 'border-box', // Evita que el padding sume al 100vh creando scroll
-        overflow: 'hidden' // Corta cualquier pequeño desbordamiento extra
+        boxSizing: 'border-box', 
+        overflow: 'hidden' 
       }}
     >
       <Paper 
         elevation={0} 
         sx={{ 
-          p: { xs: 3, md: 5 }, // Ligeramente reducido para evitar scroll vertical
+          p: { xs: 3, md: 5 }, 
           width: '100%', 
-          maxWidth: 550, // Un poco más compacto para que luzca mejor
+          maxWidth: 550, 
           borderRadius: '20px', 
           textAlign: 'center',
           border: '1px solid #EAD8B1',
@@ -66,17 +66,16 @@ const Login = () => {
         }}
       >
         <Box sx={{ mb: 3 }}>
-          {/* AQUÍ CAMBIAMOS EL LOGO A CÍRCULO */}
           <Box 
             component="img" 
             src="https://res.cloudinary.com/dqozuofy6/image/upload/v1777585907/Logo_nexo_miwd47.jpg" 
             sx={{ 
               width: 130, 
-              height: 130, // Alto igual al ancho
-              borderRadius: '50%', // Lo hace un círculo
-              objectFit: 'cover', // Asegura que llene el círculo sin distorsionarse
+              height: 130, 
+              borderRadius: '50%', 
+              objectFit: 'cover', 
               mb: 1, 
-              boxShadow: '0px 4px 10px rgba(0,0,0,0.1)' // (Opcional) Una pequeña sombra para que resalte
+              boxShadow: '0px 4px 10px rgba(0,0,0,0.1)' 
             }}
             alt="Logo Nexo"
             onError={(e) => e.target.style.display = 'none'}
@@ -142,7 +141,7 @@ const Login = () => {
             fullWidth
             variant="contained"
             sx={{ 
-              mt: 4, // Reducido de 5 a 4 para ganar espacio vertical
+              mt: 4, 
               mb: 1, 
               py: 1.5,
               borderRadius: '12px',
